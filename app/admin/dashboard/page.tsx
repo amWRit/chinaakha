@@ -1,47 +1,28 @@
-import { PrismaClient } from '@prisma/client';
+"use client";
 
-export default async function AdminDashboardPage() {
-  const prisma = new PrismaClient();
-  const poems = await prisma.poem.findMany({ orderBy: { order: 'asc' }, include: { image: true } });
-  const admins = await prisma.admin.findMany();
-  await prisma.$disconnect();
+import "@/styles/admin.css";
+import { useEffect, useState } from "react";
+import PoemsTab from "@/components/admin/PoemsTab";
+import SettingsTab from "@/components/admin/SettingsTab";
+
+export default function AdminDashboardPage() {
+  const [tab, setTab] = useState<'poems' | 'settings'>('poems');
+
+  // Add admin class to body for admin-only styles
+  useEffect(() => {
+    document.body.classList.add('admin');
+    return () => { document.body.classList.remove('admin'); };
+  }, []);
 
   return (
-    <main className="container">
-      <h1>CHINAAKHA ADMIN ✨</h1>
-      <div style={{ marginBottom: 24 }}>
-        <button>POEMS</button>
-        <button>SETTINGS</button>
+    <main className="admin-dashboard-container">
+      <h1 style={{textAlign:'center',marginBottom:32}}>CHINAAKHA ADMIN ✨</h1>
+      <div className="admin-tabs">
+        <button className={`admin-tab${tab === 'poems' ? ' active' : ''}`} onClick={() => setTab('poems')}>Poems</button>
+        <button className={`admin-tab${tab === 'settings' ? ' active' : ''}`} onClick={() => setTab('settings')}>Settings</button>
       </div>
-      <section>
-        <h2>Poems</h2>
-        <ul>
-          {poems.map(poem => (
-            <li key={poem.id}>
-              {poem.type === 'TEXT' ? poem.content : <img src={`https://drive.google.com/uc?export=view&id=${poem.image?.fileId}`} alt="Poem Image" style={{ maxWidth: '100px' }} />} 
-              <button>Delete</button>
-            </li>
-          ))}
-        </ul>
-        <h3>Add Text Poem</h3>
-        <textarea placeholder="Enter Nepali poem text" />
-        <button>Add Text Poem</button>
-        <h3>Add Image Poem</h3>
-        <input placeholder="Paste Google Drive FileId" />
-        <button>Add Image Poem</button>
-      </section>
-      <section>
-        <h2>Settings</h2>
-        <ul>
-          {admins.map(admin => (
-            <li key={admin.id}>{admin.email} <button>Delete</button></li>
-          ))}
-        </ul>
-        <h3>Add Admin</h3>
-        <input placeholder="Email" />
-        <input placeholder="Password" type="password" />
-        <button>Add Admin</button>
-      </section>
+      {tab === 'poems' && <PoemsTab />}
+      {tab === 'settings' && <SettingsTab />}
     </main>
   );
 }

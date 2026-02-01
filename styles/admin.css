@@ -1,0 +1,154 @@
+/*
+  admin.css - Glassmorphic, modern, responsive styles for admin dashboard
+  Inspired by homepage.css, but scoped for admin only
+*/
+
+body.admin {
+  background: linear-gradient(135deg, #e46c6e 0%, #fad0c4 100%);
+  min-height: 100vh;
+}
+
+.admin-dashboard-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 64px 16px;
+  box-sizing: border-box;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.admin-tab {
+  padding: 12px 32px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  box-shadow: 0 2px 12px rgba(228,108,110,0.08);
+}
+.admin-tab.active, .admin-tab:hover {
+  background: #fff;
+  color: #e46c6e;
+}
+
+.admin-subtabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-subtab {
+  padding: 8px 22px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.13);
+  color: #fff;
+  font-weight: 500;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.admin-subtab.active, .admin-subtab:hover {
+  background: #fff;
+  color: #e46c6e;
+}
+
+.admin-section {
+  background: rgba(255,255,255,0.22);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  padding: 32px 24px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.admin-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.13);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(228,108,110,0.06);
+  transition: background 0.3s;
+}
+.admin-list-item:hover {
+  background: #fff;
+  color: #e46c6e;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-btn {
+  padding: 7px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #e46c6e;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.admin-btn.edit {
+  background: #fad0c4;
+  color: #e46c6e;
+}
+.admin-btn.delete {
+  background: #fff;
+  color: #e46c6e;
+  border: 1px solid #e46c6e;
+}
+.admin-btn.add {
+  background: #fff;
+  color: #e46c6e;
+  border: 1px solid #e46c6e;
+  margin-bottom: 18px;
+}
+.admin-btn:hover {
+  filter: brightness(1.08);
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.admin-form input, .admin-form textarea {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #fad0c4;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.7);
+  color: #e46c6e;
+}
+
+@media (max-width: 700px) {
+  .admin-dashboard-container {
+    padding: 16px 2px 32px 2px;
+  }
+  .admin-section {
+    padding: 18px 6px;
+  }
+  .admin-tabs, .admin-subtabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
