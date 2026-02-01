@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Instagram, Image as ImageIcon, FileText, Sparkles } from "lucide-react";
+import { Instagram, Image as ImageIcon, FileText } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
@@ -49,14 +49,9 @@ export default function Home() {
             aria-label="Text Poems"
           >
             <div className="tab-icon-wrapper">
-              <FileText size={24} strokeWidth={2.5} />
+              <FileText size={18} strokeWidth={2.5} />
             </div>
             {/* <span className="tab-label">Text Poems</span> */}
-            {tab === 'text' && (
-              <div className="sparkle-container">
-                <Sparkles size={16} className="sparkle" />
-              </div>
-            )}
           </button>
 
           <button
@@ -65,14 +60,9 @@ export default function Home() {
             aria-label="Image Poems"
           >
             <div className="tab-icon-wrapper">
-              <ImageIcon size={24} strokeWidth={2.5} />
+              <ImageIcon size={18} strokeWidth={2.5} />
             </div>
             {/* <span className="tab-label">Image Gallery</span> */}
-            {tab === 'image' && (
-              <div className="sparkle-container">
-                <Sparkles size={16} className="sparkle" />
-              </div>
-            )}
           </button>
         </div>
         <div className={`tab-indicator ${tab === 'image' ? 'right' : 'left'}`} />
