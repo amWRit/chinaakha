@@ -1,23 +1,33 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
-import { Instagram, Image as ImageIcon, FileText } from "lucide-react";
+import { Instagram, Image as ImageIcon, FileText, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
-
 
 export default function Home() {
   const [poems, setPoems] = useState<any[]>([]);
   const [tab, setTab] = useState<'text' | 'image'>('text');
   const [count, setCount] = useState(3);
+  const [gridLayout, setGridLayout] = useState<number[]>([]);
 
   useEffect(() => {
     fetch("/api/poems")
       .then((res) => res.json())
       .then((data) => setPoems(data));
   }, []);
+
+  useEffect(() => {
+    // Generate randomized grid spans for images
+    const imagePoems = poems.filter((p) => p.type === 'IMAGE');
+    const layout = imagePoems.map(() => {
+      const random = Math.random();
+      if (random > 0.7) return 2; // 30% chance of spanning 2 rows
+      return 1; // 70% chance of spanning 1 row
+    });
+    setGridLayout(layout);
+  }, [poems]);
 
   const showMore = () => setCount((c) => Math.min(c + 3, poems.filter(p => p.type === 'TEXT').length));
 
@@ -29,43 +39,76 @@ export default function Home() {
       <div id="logo">
         <img src="/images/logo_final.png" alt="Chinaakha Logo" />
       </div>
-      <div className="flex justify-center gap-6 my-8">
-        <button
-          className={`p-3 rounded-full border-2 transition-all ${tab === 'text' ? 'bg-pink-100 border-pink-400' : 'bg-white border-gray-200'} hover:border-pink-400`}
-          onClick={() => setTab('text')}
-          aria-label="Text Poems"
-        >
-          <FileText size={28} color={tab === 'text' ? '#e46c6e' : '#888'} />
-        </button>
-        <button
-          className={`p-3 rounded-full border-2 transition-all ${tab === 'image' ? 'bg-pink-100 border-pink-400' : 'bg-white border-gray-200'} hover:border-pink-400`}
-          onClick={() => setTab('image')}
-          aria-label="Image Poems"
-        >
-          <ImageIcon size={28} color={tab === 'image' ? '#e46c6e' : '#888'} />
-        </button>
+
+      {/* Enhanced Tab Buttons */}
+      <div className="tab-container">
+        <div className="tab-wrapper">
+          <button
+            className={`tab-button ${tab === 'text' ? 'active' : ''}`}
+            onClick={() => setTab('text')}
+            aria-label="Text Poems"
+          >
+            <div className="tab-icon-wrapper">
+              <FileText size={24} strokeWidth={2.5} />
+            </div>
+            {/* <span className="tab-label">Text Poems</span> */}
+            {tab === 'text' && (
+              <div className="sparkle-container">
+                <Sparkles size={16} className="sparkle" />
+              </div>
+            )}
+          </button>
+
+          <button
+            className={`tab-button ${tab === 'image' ? 'active' : ''}`}
+            onClick={() => setTab('image')}
+            aria-label="Image Poems"
+          >
+            <div className="tab-icon-wrapper">
+              <ImageIcon size={24} strokeWidth={2.5} />
+            </div>
+            {/* <span className="tab-label">Image Gallery</span> */}
+            {tab === 'image' && (
+              <div className="sparkle-container">
+                <Sparkles size={16} className="sparkle" />
+              </div>
+            )}
+          </button>
+        </div>
+        <div className={`tab-indicator ${tab === 'image' ? 'right' : 'left'}`} />
       </div>
 
+      {/* Text Poems Tab */}
       {tab === 'text' && (
-        <div>
-          {textPoems.slice(0, count).map((poem) => (
-            <TextPoem key={poem.id} content={poem.content} />
+        <div className="text-poems-container">
+          {textPoems.slice(0, count).map((poem, index) => (
+            <div 
+              key={poem.id} 
+              className="poem-card-wrapper"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <TextPoem content={poem.content} />
+            </div>
           ))}
           {count < textPoems.length && (
-            <button className="button-30" onClick={showMore} style={{ margin: "2rem auto", display: "block" }}>
+            <button className="button-30 show-more-btn" onClick={showMore}>
               Show More
             </button>
           )}
         </div>
       )}
 
+      {/* Image Poems Tab */}
       {tab === 'image' && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 py-4" style={{ gridAutoRows: 'minmax(180px, 1fr)' }}>
+        <div className="image-gallery">
           {imagePoems.map((item, idx) => (
             <div
               key={item.id}
-              className="group relative overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-500 hover:scale-105"
-              style={{ gridRow: idx % 3 === 0 ? 'span 2' : 'span 1' }}
+              className="image-card"
+              style={{
+                gridRow: `span ${gridLayout[idx] || 1}`,
+                animationDelay: `${idx * 0.08}s`
+              }}
             >
               <ImagePoem fileId={item.image?.fileId} title={item.title || ''} />
             </div>
@@ -81,17 +124,7 @@ export default function Home() {
             href="https://instagram.com/chinaakha"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 48,
-              height: 48,
-              background: "transparent",
-              borderRadius: "50%",
-              border: "2px solid #fff",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.10)"
-            }}
+            className="instagram-link"
           >
             <Instagram size={28} color="#fff" />
           </a>
