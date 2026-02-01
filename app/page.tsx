@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Instagram, Image as ImageIcon, FileText, Sparkles } from "lucide-react";
+import { Instagram, Image as ImageIcon, FileText } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
+const ImageLightbox = dynamic(() => import("../components/ImageLightBox"), { ssr: false });
 
 export default function Home() {
   const [poems, setPoems] = useState<any[]>([]);
   const [tab, setTab] = useState<'text' | 'image'>('text');
   const [count, setCount] = useState(3);
   const [gridLayout, setGridLayout] = useState<number[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ fileId: string; title: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/poems")
@@ -34,6 +37,16 @@ export default function Home() {
   const textPoems = poems.filter((p) => p.type === 'TEXT');
   const imagePoems = poems.filter((p) => p.type === 'IMAGE');
 
+  const handleImageClick = (fileId: string, title: string) => {
+    setSelectedImage({ fileId, title });
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setTimeout(() => setSelectedImage(null), 300); // Clear after animation
+  };
+
   return (
     <main className="container">
       <div id="logo">
@@ -49,14 +62,9 @@ export default function Home() {
             aria-label="Text Poems"
           >
             <div className="tab-icon-wrapper">
-              <FileText size={24} strokeWidth={2.5} />
+              <FileText size={18} strokeWidth={2.5} />
             </div>
             {/* <span className="tab-label">Text Poems</span> */}
-            {tab === 'text' && (
-              <div className="sparkle-container">
-                <Sparkles size={16} className="sparkle" />
-              </div>
-            )}
           </button>
 
           <button
@@ -65,14 +73,9 @@ export default function Home() {
             aria-label="Image Poems"
           >
             <div className="tab-icon-wrapper">
-              <ImageIcon size={24} strokeWidth={2.5} />
+              <ImageIcon size={18} strokeWidth={2.5} />
             </div>
             {/* <span className="tab-label">Image Gallery</span> */}
-            {tab === 'image' && (
-              <div className="sparkle-container">
-                <Sparkles size={16} className="sparkle" />
-              </div>
-            )}
           </button>
         </div>
         <div className={`tab-indicator ${tab === 'image' ? 'right' : 'left'}`} />
@@ -109,11 +112,22 @@ export default function Home() {
                 gridRow: `span ${gridLayout[idx] || 1}`,
                 animationDelay: `${idx * 0.08}s`
               }}
+              onClick={() => handleImageClick(item.image?.fileId, item.title || '')}
             >
               <ImagePoem fileId={item.image?.fileId} title={item.title || ''} />
             </div>
           ))}
         </div>
+      )}
+
+      {/* Lightbox */}
+      {selectedImage && (
+        <ImageLightbox
+          fileId={selectedImage.fileId}
+          title={selectedImage.title}
+          isOpen={lightboxOpen}
+          onClose={closeLightbox}
+        />
       )}
 
       <div className="text">- RANDOM FEELINGS PUT INTO WORDS -</div>
