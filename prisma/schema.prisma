@@ -1,0 +1,49 @@
+// Prisma schema for Chinaakha
+// Neon Postgres connection
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Poem {
+  id        String   @id @default(cuid())
+  content   String?  // Nepali text (nullable for images)
+  type      PoemType // "TEXT" | "IMAGE"
+  imageId   String?  @unique // GDriveImageResource.id (nullable for text)
+  createdAt DateTime @default(now())
+  order     Int      @default(0)
+  image     GDriveImageResource? @relation("PoemImage", fields: [imageId], references: [id])
+}
+
+model GDriveImageResource {
+  id        String   @id @default(cuid())
+  fileId    String   @unique  // Google Drive FILE_ID only
+  poem      Poem?    @relation("PoemImage")
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hashed
+  name      String?
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  adminId   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+enum PoemType {
+  TEXT
+  IMAGE
+}

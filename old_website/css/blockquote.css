@@ -1,0 +1,123 @@
+/* https://codepen.io/jupago/pen/GPxqLX */
+
+body { 
+  background-color: #e46c6eff;
+ }
+
+/* center the blockquote in the page */
+.blockquote-wrapper {
+   display: flex;
+   height: 100vh;
+   padding: 0 20px;
+}
+
+/* Blockquote main style */
+.blockquote {
+    position: relative;
+    font-family: 'Barlow Condensed', sans-serif;
+    max-width: 820px;
+    margin: 60px auto;
+    align-self: center;
+}
+
+.blockquote.hide-me {
+    display: none;
+}
+.hide-me {
+    display: none;
+}
+/* Blockquote header */
+.blockquote h1 {
+    font-family: 'Abril Fatface', cursive;
+    position: relative; /* for pseudos */
+    color: #fffce9ff;
+    font-size: 1rem;
+    font-weight: normal;
+    line-height: 1;
+    margin: 0;
+    border: 2px solid #fff;
+    border: solid 2px;
+    border-radius:20px;
+    padding: 15px;
+	box-shadow: 10px 10px rgb(0 0 0 / 15%);
+	transition: all .4s ease;
+}
+
+.blockquote h1:hover {
+  border-radius: 0% 0% 50% 50% / 0% 0% 5% 5% ;
+  box-shadow: 10px 10px rgba(0,0,0,.25);
+}
+
+
+/* increase header size after 600px */
+@media all and (min-width: 600px) {
+    .blockquote h1 {
+        font-size: 1.5rem;
+        line-height: 1.2;
+		white-space: pre-wrap;
+   }
+
+}
+
+/* Blockquote subheader */
+.blockquote h4 {
+    position: relative;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin: 0;
+    padding-top: 15px;
+    z-index: 1;
+    margin-left:150px;
+    padding-left:12px;
+}
+
+ 
+.blockquote h4:first-letter {
+  margin-left:-12px;
+}
+
+.tv {
+  position: relative;
+  width: 350px;
+  height: 550px;
+  background: white;
+  border-radius: 0% 0% 0% 0% / 0% 0% 0% 0% ;
+  color: white;
+  box-shadow: 20px 20px rgba(0,0,0,.15);
+  transition: all .4s ease;
+}
+.tv:hover {
+  border-radius: 0% 0% 50% 50% / 0% 0% 5% 5% ;
+  box-shadow: 10px 10px rgba(0,0,0,.25);
+}
+
+.sketchy {
+    padding: 1rem 1rem;
+    display: inline-block;
+	margin-bottom: 10px;
+    border: 3px solid #333333;
+    /* font-size: 2.5rem; */
+    border-radius: 2% 6% 5% 4% / 1% 1% 2% 4%;
+    text-transform: uppercase;
+    letter-spacing: 0.3ch;
+    background: #ffffff;
+    position: relative;
+}
+
+.sketchy:before {
+	content: '';
+	border: 2px solid #353535;
+	display: block;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate3d(-50%, -50%, 0) scale(1.015) rotate(0.5deg);
+	border-radius: 1% 1% 2% 4% / 2% 6% 5% 4%;
+}
+.sketchy:hover {
+	width: 102%;
+}

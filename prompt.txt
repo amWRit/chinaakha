@@ -1,0 +1,163 @@
+# Chinaakha - Next.js 15 + Prisma + Vercel Copilot Prompt (FINAL)
+
+## 🚀 PROJECT OVERVIEW
+Revamp existing single-page Nepali poetry website "Chinaakha" (@chinaakha) from static HTML/JS to **Next.js 15 App Router** fullstack app hosted on **Vercel** with **Neon Postgres + Prisma** backend.
+
+**KEEP EXACT SAME PUBLIC UI/UX** - modernize tech stack, add admin + dual view (text/images).
+
+## 📁 REFERENCE MATERIALS (CRITICAL)
+📂 /old_website/ folder contains:
+├── index.html (exact layout structure)
+├── css/styles.css (button-30, container, responsive)
+├── css/blockquote.css (poem styling)
+├── js/getPoem.js (shuffle + progressive loading logic)
+├── images/logofinal.png (preserve exactly)
+└── poems.txt (Nepali poems for DB seeding)
+
+RECREATE IDENTICAL PIXEL-PERFECT LAYOUT using these exact CSS/JS files
+
+text
+
+## 🎨 EXISTING UI LAYOUT (MUST PRESERVE EXACTLY)
+[LOGO: old_website/images/logofinal.png - centered, margin-top: 25px]
+[POEMS/IMAGES - blockquote styling from blockquote.css, progressive load 3 → Show More]
+"- RANDOM FEELINGS PUT INTO WORDS -" [tagline, .text class]
+💖 [heart emoji, #heart styling]
+📸 [Instagram @chinaakha - FontAwesome icon]
+
+text
+**Copy CSS classes**: `blockquote`, `hide-me`, `button-30`, `.text` exactly from old_website CSS files
+
+## 🌱 DATABASE SEEDING (Initial Data)
+TEXT POEMS: Parse old_website/poems.txt (split by "--")
+→ INSERT into Poem[type="TEXT", content=poemText]
+
+IMAGE POEMS: Pull 10 free Unsplash images (Nepali poetry aesthetic)
+→ Upload to Google Drive → Get shareable links → Extract fileIds
+→ INSERT into GDriveImageResource + Poem[type="IMAGE"]
+
+text
+
+## 🗄️ DATABASE MODELS (Neon Postgres + Prisma)
+```prisma
+model Poem {
+  id          String             @id @default(cuid())
+  content     String?            // Nepali text (nullable for images)
+  type        PoemType           // "TEXT" | "IMAGE" 
+  imageId     String?            // GDriveImageResource.id (nullable for text)
+  createdAt   DateTime           @default(now())
+  order       Int                @default(0)
+  
+  image       GDriveImageResource? @relation("PoemImage")
+}
+
+model GDriveImageResource {
+  id        String   @id @default(cuid())
+  fileId    String   @unique  // Google Drive FILE_ID only
+  poem      Poem?    @relation("PoemImage")
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String    // bcrypt hashed
+  name        String?
+  sessions    Session[]
+  createdAt   DateTime  @default(now())
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  adminId      String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  admin        Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+enum PoemType {
+  TEXT
+  IMAGE
+}
+📂 FOLDER STRUCTURE
+text
+app/
+├── poems/
+│   ├── page.tsx              # Text poems (default)
+│   └── images/
+│       └── page.tsx          # Image poems
+├── admin/
+│   ├── login/
+│   │   └── page.tsx
+│   ├── dashboard/            # SINGLE PAGE TABS
+│   │   └── page.tsx          # [POEMS] [SETTINGS]
+│   └── layout.tsx
+├── api/admin/
+│   ├── auth/                 # login/me/logout
+│   ├── poems/                # CRUD
+│   └── admins/               # CRUD
+old_website/                    # 👈 PRESERVE ALL FILES HERE
+│   ├── index.html
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   └── poems.txt             # 👈 SEED FROM HERE
+prisma/
+├── schema.prisma
+└── seed.ts                   # poems.txt → DB
+public/
+└── images/logofinal.png      # Copy from old_website
+🌾 SEED SCRIPT (prisma/seed.ts)
+typescript
+// 1. Parse old_website/poems.txt → TEXT poems (split "--")
+const poemsTxt = await fs.readFile('old_website/poems.txt', 'utf8');
+const textPoems = poemsTxt.split(/--/).map(p => p.trim()).filter(Boolean);
+
+// 2. 10 Unsplash images → Google Drive → IMAGE poems
+const unsplashImages = [
+  // Poetry aesthetic images (Nepali themed)
+];
+👥 ADMIN DASHBOARD TABS (/admin/dashboard)
+text
+CHINAAKHA ADMIN ✨                    [Logout]
+┌─────────────────────────────────────┐
+│ [📝 POEMS] [👥 SETTINGS] ← Tabs     │
+├─────────────────────────────────────┤
+│ 📝 POEMS:                           │
+│ ├─ Text Poem [Large Nepali textarea]│
+│ ├─ Image Poem [Paste GDrive URL]    │
+│ │   * Auto-extracts fileId         │
+│ └─ List All Poems [DELETE]          │
+│                                     │
+│ 👥 SETTINGS:                        │
+│ ├─ Admins List [DELETE others]      │
+│ ├─ Add Admin [Email/Password]       │
+│ └─ (Current user protected)         │
+└─────────────────────────────────────┘
+🔧 PUBLIC BEHAVIOR (IDENTICAL TO OLD SITE)
+text
+1. /poems → Load from DB (copy shuffleArray + showMore logic from old_website/js/getPoem.js)
+2. /poems/images → Next/Image from GDrive fileIds
+3. Show 3 poems → "Show More" (button-30) → Next 3 → Hide when done
+4. EXACT SAME animations/CSS/transitions from old_website CSS
+🎨 STYLING (FROM OLD_WEBSITE)
+text
+✅ COPY styles.css → globals.css (button-30, container, responsive)
+✅ COPY blockquote.css → components/poem.css (blockquote, hide-me) 
+✅ Abril Fatface Google Font (from old HTML)
+✅ IDENTICAL spacing/margins/padding from current site
+✅ Mobile-first breakpoints from styles.css
+🚀 DEPLOYMENT + SEEDING
+text
+1. GitHub → Vercel (auto-deploy)
+2. Neon Postgres (Vercel Marketplace)
+3. Run: npx prisma db push && npx prisma db seed
+4. Env: DATABASE_URL, NEXTAUTH_SECRET
+🎉 SUCCESS CRITERIA
+✅ PIXEL-PERFECT public UI from old_website (use CSS/JS files)
+✅ DB seeded from old_website/poems.txt + 10 Unsplash→GDrive images
+✅ Admin tabs: Poems + Settings (single /admin/dashboard)
+✅ Progressive loading EXACTLY like old site
+✅ Nepali UTF-8 perfect
+✅ Vercel production deploy
+✅ Mobile responsive (from old CSS)
