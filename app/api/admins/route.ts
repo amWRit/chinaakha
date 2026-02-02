@@ -11,7 +11,9 @@ export async function GET() {
     response.headers.set('x-admin-authenticated', 'false');
     return response;
   } else {
-    response = NextResponse.json({ authenticated: true });
+    // Return array of admins for AccountTab
+    const admins = await prisma.admin.findMany({ select: { id: true, email: true } });
+    response = NextResponse.json(admins);
     response.headers.set('x-admin-authenticated', 'true');
     return response;
   }
