@@ -119,14 +119,7 @@ export default function AddImagePoemModal({ isOpen, onClose, onSuccess }: AddIma
               className="modal-btn modal-btn-submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                "Adding..."
-              ) : (
-                <>
-                  <Plus size={18} />
-                  <span>Add Image</span>
-                </>
-              )}
+              {isSubmitting ? "Adding..." : "Add"}
             </button>
           </div>
         </form>
