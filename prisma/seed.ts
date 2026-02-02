@@ -13,11 +13,13 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // 1. Seed text poems from poems.txt
-  const poemsTxt = await fs.readFile('old_website/poems.txt', 'utf8');
+  const poemsTxt = await fs.readFile('./prisma/poems.txt', 'utf8');
   const textPoems = poemsTxt.split(/--/).map(p => p.trim()).filter(Boolean);
   for (const [order, content] of textPoems.entries()) {
+    const title = content.split('\n')[0] || `Poem ${order + 1}`;
     await prisma.poem.create({
       data: {
+        title,
         content,
         type: 'TEXT',
         order,
@@ -41,6 +43,7 @@ async function main() {
     });
     await prisma.poem.create({
       data: {
+        title: `Image ${i + 1}`,
         type: 'IMAGE',
         imageId: image.id,
         order: textPoems.length + i,
