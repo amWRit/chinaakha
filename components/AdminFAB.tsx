@@ -11,7 +11,12 @@ interface AdminFABProps {
 export default function AdminFAB({ onAddTextPoem, onAddImagePoem }: AdminFABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <>
@@ -26,14 +31,15 @@ export default function AdminFAB({ onAddTextPoem, onAddImagePoem }: AdminFABProp
       </button>
 
       {/* Backdrop */}
-      {isOpen && <div className="fab-backdrop" onClick={toggleMenu} />}
+      {isOpen && <div className="fab-backdrop" onClick={closeMenu} />}
 
       {/* FAB Menu Options */}
       <div className={`fab-menu ${isOpen ? 'fab-menu-open' : ''}`}>
         <button
           className="fab-option fab-option-1"
-          onClick={() => {
-            setIsOpen(false);
+          onClick={(e) => {
+            e.stopPropagation();
+            closeMenu();
             onAddTextPoem();
           }}
           aria-label="Add Text Poem"
@@ -44,8 +50,9 @@ export default function AdminFAB({ onAddTextPoem, onAddImagePoem }: AdminFABProp
 
         <button
           className="fab-option fab-option-2"
-          onClick={() => {
-            setIsOpen(false);
+          onClick={(e) => {
+            e.stopPropagation();
+            closeMenu();
             onAddImagePoem();
           }}
           aria-label="Add Image Poem"
