@@ -415,3 +415,50 @@ body.admin {
     min-width: 100px;
   }
 }
+
+/* Modern action button for login page and dialogs */
+.admin-action-btn {
+  width: 100%;
+  padding: 18px 0;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 1.13rem;
+  background: rgba(255,255,255,0.13);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid #fff;
+  color: #fff;
+  /* color is set above for glassmorphism */
+  box-shadow: 0 2px 16px rgba(228,108,110,0.13);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+.admin-action-btn:hover, .admin-action-btn:focus {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  border-color: #e46c6e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(228,108,110,0.18);
+}
+.admin-action-btn:active {
+  background: #e46c6e;
+  color: #fff;
+  transform: none;
+}
+.admin-action-btn.alt {
+  background: #fff;
+  color: #e46c6e;
+  border: 2px solid #e46c6e;
+  box-shadow: 0 2px 12px rgba(228,108,110,0.10);
+  margin-bottom: 0;
+}
+.admin-action-btn.alt:hover, .admin-action-btn.alt:focus {
+  background: #e46c6e;
+  color: #fff;
+}

@@ -8,6 +8,7 @@ export default function AccountTab() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetch("/api/admins").then(res => res.json()).then(setAdmins);
@@ -20,7 +21,10 @@ export default function AccountTab() {
     try {
       await fetch("/api/admins", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-add-admin": "true"
+        },
         body: JSON.stringify({ email, password })
       });
       setEmail(""); 
@@ -50,7 +54,25 @@ export default function AccountTab() {
       {showAdd && (
         <form className="admin-form" onSubmit={handleAdd}>
           <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+          <div style={{ display: "flex", alignItems: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+            <input
+              type="checkbox"
+              id="show-password-admin"
+              checked={showPassword}
+              onChange={() => setShowPassword(v => !v)}
+              style={{ marginRight: "0.5rem", width: "1.25em", height: "1.25em" }}
+            />
+            <label htmlFor="show-password-admin" style={{ fontSize: "0.95em", cursor: "pointer" }}>
+              Show Password
+            </label>
+          </div>
           <button className="admin-btn add" type="submit" disabled={isSubmitting}>
             <Plus size={18} />
             <span className="admin-btn-text">{isSubmitting ? "Adding..." : "Add"}</span>

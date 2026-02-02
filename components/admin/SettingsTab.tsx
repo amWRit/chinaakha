@@ -11,7 +11,7 @@ export default function SettingsTab() {
       <div className="admin-subtabs">
         <button className={`admin-subtab${subTab === 'account' ? ' active' : ''}`} onClick={() => setSubTab('account')}>
           <UserCircle size={18} />
-          <span className="admin-tab-text">Account</span>
+          <span className="admin-tab-text">Accounts</span>
         </button>
         <button className={`admin-subtab${subTab === 'future' ? ' active' : ''}`} onClick={() => setSubTab('future')}>
           <Sparkles size={18} />

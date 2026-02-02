@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Instagram, Image as ImageIcon, FileText } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
@@ -14,6 +15,48 @@ export default function Home() {
   const [gridLayout, setGridLayout] = useState<number[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ fileId: string; title: string } | null>(null);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const tapCount = useRef(0);
+  const tapTimeout = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
+  // Detect mobile
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Desktop: listen for typing 'admin'
+  useEffect(() => {
+    if (isMobile) return;
+    let buffer = '';
+    const handler = (e: KeyboardEvent) => {
+      buffer += e.key.toLowerCase();
+      if (buffer.length > 5) buffer = buffer.slice(-5);
+      if (buffer === 'admin') {
+        setShowAdmin(true);
+        buffer = '';
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isMobile]);
+
+  // Mobile: triple-tap logo
+  const handleLogoTap = () => {
+    if (!isMobile) return;
+    tapCount.current += 1;
+    if (tapTimeout.current) clearTimeout(tapTimeout.current);
+    tapTimeout.current = setTimeout(() => {
+      tapCount.current = 0;
+    }, 1000);
+    if (tapCount.current === 3) {
+      setShowAdmin(true);
+      tapCount.current = 0;
+    }
+  };
 
   useEffect(() => {
     fetch("/api/poems")
@@ -49,9 +92,28 @@ export default function Home() {
 
   return (
     <main className="container">
-      <div id="logo">
+      <div id="logo" onClick={handleLogoTap} style={{ cursor: isMobile ? 'pointer' : undefined }}>
         <img src="/images/logo_final.png" alt="Chinaakha Logo" />
       </div>
+
+      {/* Admin Button */}
+      {showAdmin && (
+        <button
+          className="admin-btn"
+          style={{ position: 'fixed', top: 24, right: 24, zIndex: 1000 }}
+          onClick={async () => {
+            // Check session
+            const res = await fetch('/api/admins', { method: 'GET' });
+            if (res.status === 200 && res.headers.get('x-admin-authenticated') === 'true') {
+              router.push('/admin/dashboard');
+            } else {
+              router.push('/admin/login');
+            }
+          }}
+        >
+          Admin
+        </button>
+      )}
 
       {/* Enhanced Tab Buttons */}
       <div className="tab-container">
