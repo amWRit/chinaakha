@@ -42,7 +42,7 @@ export default function PoemsTextTab() {
       <ul className="admin-list">
         {poems.map(poem => (
           <li className="admin-list-item" key={poem.id}>
-            <span>{poem.content}</span>
+            <span>{poem.title}</span>
             <div className="admin-actions">
               {/* View/Edit can be implemented as needed */}
               <button className="admin-btn delete" onClick={() => handleDelete(poem.id)}>Delete</button>

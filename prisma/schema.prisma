@@ -11,6 +11,7 @@ datasource db {
 
 model Poem {
   id        String   @id @default(cuid())
+  title     String   // Title of the poem
   content   String?  // Nepali text (nullable for images)
   type      PoemType // "TEXT" | "IMAGE"
   imageId   String?  @unique // GDriveImageResource.id (nullable for text)

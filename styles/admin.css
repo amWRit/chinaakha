@@ -4,7 +4,7 @@
 */
 
 body.admin {
-  background: linear-gradient(135deg, #e46c6e 0%, #fad0c4 100%);
+  background: #e46c6e;
   min-height: 100vh;
 }
 
@@ -67,6 +67,7 @@ body.admin {
   padding: 32px 24px;
   margin-bottom: 32px;
   backdrop-filter: blur(10px);
+  color: #fff;
 }
 
 .admin-list {
@@ -85,6 +86,7 @@ body.admin {
   padding: 16px 18px;
   box-shadow: 0 2px 8px rgba(228,108,110,0.06);
   transition: background 0.3s;
+  color: #fff;
 }
 .admin-list-item:hover {
   background: #fff;
@@ -137,7 +139,7 @@ body.admin {
   border: 1px solid #fad0c4;
   font-size: 1rem;
   background: rgba(255,255,255,0.7);
-  color: #e46c6e;
+  color: #fff;
 }
 
 @media (max-width: 700px) {
