@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export default async function PoemsImagesPage() {
-  const prisma = new PrismaClient();
   const poems = await prisma.poem.findMany({
     where: { type: 'IMAGE' },
     orderBy: { order: 'asc' },
     include: { image: true },
   });
-  await prisma.$disconnect();
 
   return (
     <main className="container">

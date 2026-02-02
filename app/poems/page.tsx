@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 // Removed invalid CSS import; global styles should be imported in _app.tsx
 
 export default async function PoemsPage() {
-  const prisma = new PrismaClient();
   const poems = await prisma.poem.findMany({
     orderBy: { order: 'asc' },
     include: { image: true },
   });
-  await prisma.$disconnect();
 
   return (
     <main className="container">
