@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chinaakha:",
-  description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
+  title: "Chin:Aakha",
+  description: "- RANDOM FEELINGS PUT INTO WORDS -",
   icons: {
     icon: "/images/logos/favicon.ico",
     apple: "/images/logos/apple-touch-icon.png",
@@ -38,26 +38,27 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Chinaakha",
+    title: "Chin:Aakha",
   },
+  metadataBase: new URL('https://chinaakha.vercel.app'),
   openGraph: {
     type: "website",
-    title: "Chinaakha:",
-    description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
-    siteName: "Chinaakha",
+    title: "Chin:Aakha:",
+    description: "- RANDOM FEELINGS PUT INTO WORDS -",
+    siteName: "Chin:Aakha",
     images: [
       {
         url: "/images/logos/android-chrome-512x512.png",
         width: 512,
         height: 512,
-        alt: "Chinaakha Logo",
+        alt: "Chin:Aakha Logo",
       },
     ],
   },
   twitter: {
-    card: "summary",
-    title: "Chinaakha:",
-    description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
+    card: "summary_large_image",
+    title: "Chin:Aakha:",
+    description: "- RANDOM FEELINGS PUT INTO WORDS -",
     images: ["/images/logos/android-chrome-512x512.png"],
   },
 };
