@@ -33,7 +33,7 @@ body.admin {
   display: flex;
   gap: 0;
   margin-bottom: 12px;
-  border-bottom: 4px solid #fff;
+  border-bottom: 3px solid #fff;
 }
 
 .admin-tab {
@@ -44,8 +44,8 @@ body.admin {
   font-weight: 600;
   font-size: 1.05rem;
   border: none;
-  border-bottom: 4px solid transparent;
-  margin-bottom: -4px;
+  border-bottom: 3px solid transparent;
+  /* margin-bottom: -4px; */
   cursor: pointer;
   transition: all 0.2s ease;
   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
@@ -136,7 +136,7 @@ body.admin {
 
 .admin-list-item {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 16px;
   background: rgba(255,255,255,0.15);
@@ -264,6 +264,33 @@ body.admin {
   
   .admin-btn.add {
     padding: 10px 16px;
+  }
+  
+  .admin-list-item {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .poem-content-wrapper {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  
+  .admin-order-number {
+    order: -1 !important;
+    align-self: flex-end !important;
+    margin-bottom: -8px !important;
+  }
+  
+  .admin-actions {
+    gap: 6px;
+    align-self: flex-end !important;
+  }
+  
+  .admin-btn.edit,
+  .admin-btn.delete {
+    padding: 6px 10px;
   }
 }
 

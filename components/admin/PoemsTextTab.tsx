@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash, Plus } from "lucide-react";
+import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
 import Modal from "./Modal";
 
 export default function PoemsTextTab() {
@@ -11,9 +11,11 @@ export default function PoemsTextTab() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
+    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order || 0) - (b.order || 0))));
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -70,6 +72,91 @@ export default function PoemsTextTab() {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newPoems = [...poems];
+    const draggedPoem = newPoems[draggedIndex];
+    newPoems.splice(draggedIndex, 1);
+    newPoems.splice(index, 0, draggedPoem);
+    
+    setPoems(newPoems);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = async () => {
+    if (draggedIndex === null) return;
+    
+    // Update order in database
+    const updates = poems.map((poem, index) => ({
+      id: poem.id,
+      order: index
+    }));
+
+    await fetch("/api/poems", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ updates })
+    });
+
+    setDraggedIndex(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    setDraggedIndex(index);
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (draggedIndex === null || touchStartY === null) return;
+    
+    const currentY = e.touches[0].clientY;
+    const delta = currentY - touchStartY;
+    
+    // Calculate approximate item height (including padding and gap)
+    const itemHeight = 90; // Approximate height of each list item
+    const indexChange = Math.round(delta / itemHeight);
+    
+    if (indexChange !== 0) {
+      const newIndex = Math.max(0, Math.min(poems.length - 1, draggedIndex + indexChange));
+      
+      if (newIndex !== draggedIndex) {
+        const newPoems = [...poems];
+        const draggedPoem = newPoems[draggedIndex];
+        newPoems.splice(draggedIndex, 1);
+        newPoems.splice(newIndex, 0, draggedPoem);
+        
+        setPoems(newPoems);
+        setDraggedIndex(newIndex);
+        setTouchStartY(currentY);
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (draggedIndex === null) return;
+    
+    // Update order in database
+    const updates = poems.map((poem, index) => ({
+      id: poem.id,
+      order: index
+    }));
+
+    await fetch("/api/poems", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ updates })
+    });
+
+    setDraggedIndex(null);
+    setTouchStartY(null);
+  };
+
   const handleViewPoem = (poem: any) => {
     setSelectedPoem(poem);
     setShowViewModal(true);
@@ -108,9 +195,12 @@ export default function PoemsTextTab() {
         <Modal isOpen={showViewModal} onClose={() => setShowViewModal(false)} title="">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-              <h4 style={{ margin: '0 0 8px 0', color: '#e46c6e', fontSize: '1.2rem', fontWeight: 600 }}>
-                {selectedPoem.title}
-              </h4>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ color: '#e46c6e', fontSize: '0.9rem', fontWeight: 600 }}>#{poems.findIndex(p => p.id === selectedPoem.id) + 1}</span>
+                <h4 style={{ margin: 0, color: '#e46c6e', fontSize: '1.2rem', fontWeight: 600 }}>
+                  {selectedPoem.title}
+                </h4>
+              </div>
               <p style={{ margin: 0, color: '#999', fontSize: '0.85rem' }}>
                 Created: {formatDate(selectedPoem.createdAt)}
               </p>
@@ -130,24 +220,103 @@ export default function PoemsTextTab() {
       )}
 
       <ul className="admin-list">
-        {poems.map(poem => (
-          <li className="admin-list-item" key={poem.id}>
-            <span 
-              style={{ cursor: 'pointer', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }} 
-              onClick={() => handleViewPoem(poem)}
+        {poems.map((poem, index) => (
+          <li 
+            key={poem.id}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragEnd={handleDragEnd}
+            style={{ 
+              opacity: draggedIndex === index ? 0.5 : 1,
+              display: 'flex',
+              gap: '0',
+              alignItems: 'stretch',
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '10px',
+              marginBottom: '12px',
+              padding: '12px 16px 12px 0',
+              transition: 'all 0.2s ease',
+              color: '#fff'
+            }}
+          >
+            {/* Drag Handle Column */}
+            <div 
+              style={{ 
+                cursor: 'grab', 
+                color: '#fff', 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 8px 0 12px',
+                borderRight: '2px solid rgba(255,255,255,0.2)',
+                marginRight: '12px',
+                alignSelf: 'stretch',
+                touchAction: 'none'
+              }}
+              onTouchStart={(e) => handleTouchStart(e, index)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
-              <span>{poem.title}</span>
-              <span className="admin-timestamp">
-                {formatDate(poem.createdAt)}
-              </span>
-            </span>
-            <div className="admin-actions">
-              <button className="admin-btn edit" onClick={() => handleEdit(poem)}>
-                <Pencil size={16} />
-              </button>
-              <button className="admin-btn delete" onClick={() => handleDelete(poem.id)}>
-                <Trash size={16} />
-              </button>
+              <GripVertical size={20} />
+            </div>
+            
+            {/* Content and Actions Wrapper */}
+            <div className="poem-content-wrapper" style={{ 
+              flex: 1, 
+              minWidth: 0, 
+              display: 'flex', 
+              flexDirection: 'row',
+              gap: '12px',
+              alignItems: 'center'
+            }}>
+              {/* Content Area */}
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {/* Title */}
+                <span 
+                  style={{ 
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                    wordBreak: 'break-word'
+                  }} 
+                  onClick={() => handleViewPoem(poem)}
+                >
+                  {poem.title}
+                </span>
+                
+                {/* Timestamp */}
+                <div 
+                  className="admin-timestamp" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => handleViewPoem(poem)}
+                >
+                  {formatDate(poem.createdAt)}
+                </div>
+              </div>
+              
+              {/* Order Number */}
+              <div className="admin-order-number" style={{ 
+                fontSize: '0.85rem', 
+                fontWeight: 600, 
+                color: 'rgba(255,255,255,0.6)',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                #{index + 1}
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="admin-actions" style={{ flexShrink: 0 }}>
+                <button className="admin-btn edit" onClick={() => handleEdit(poem)}>
+                  <Pencil size={16} />
+                </button>
+                <button className="admin-btn delete" onClick={() => handleDelete(poem.id)}>
+                  <Trash size={16} />
+                </button>
+              </div>
             </div>
           </li>
         ))}
