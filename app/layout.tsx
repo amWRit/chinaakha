@@ -43,23 +43,26 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://chinaakha.vercel.app'),
   openGraph: {
     type: "website",
-    title: "Chin:Aakha:",
-    description: "- RANDOM FEELINGS PUT INTO WORDS -",
+    url: "https://chinaakha.vercel.app",
+    title: "Chin:Aakha",
+    description: "RANDOM FEELINGS PUT INTO WORDS",
     siteName: "Chin:Aakha",
+    locale: "en_US",
     images: [
       {
-        url: "/images/logos/android-chrome-512x512.png",
+        url: "https://chinaakha.vercel.app/images/logos/android-chrome-512x512.png",
         width: 512,
         height: 512,
         alt: "Chin:Aakha Logo",
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chin:Aakha:",
-    description: "- RANDOM FEELINGS PUT INTO WORDS -",
-    images: ["/images/logos/android-chrome-512x512.png"],
+    title: "Chin:Aakha",
+    description: "RANDOM FEELINGS PUT INTO WORDS",
+    images: ["https://chinaakha.vercel.app/images/logos/android-chrome-512x512.png"],
   },
 };
 

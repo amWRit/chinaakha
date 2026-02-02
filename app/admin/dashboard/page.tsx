@@ -3,7 +3,7 @@
 import "@/styles/admin.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, BookOpen, Settings, LogOut } from "lucide-react";
+import { Shield, BookOpen, Settings, LogOut, Home } from "lucide-react";
 import PoemsTab from "@/components/admin/PoemsTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 
@@ -34,16 +34,27 @@ export default function AdminDashboardPage() {
           <Shield size={32} />
           ADMIN
         </h1>
-        <button
-          className="admin-logout-btn"
-          style={{ background: '#e46c6e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', marginLeft: 16, display: 'flex', alignItems: 'center', gap: 8 }}
-          onClick={async () => {
-            await fetch('/api/admins/logout', { method: 'POST', credentials: 'include' });
-            router.replace('/');
-          }}
-        >
-          <LogOut size={20} /> Logout
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="admin-logout-btn"
+            style={{ background: '#e46c6e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={() => router.push('/')}
+          >
+            <Home size={20} />
+            <span className="admin-btn-text">Home</span>
+          </button>
+          <button
+            className="admin-logout-btn"
+            style={{ background: '#e46c6e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={async () => {
+              await fetch('/api/admins/logout', { method: 'POST', credentials: 'include' });
+              router.replace('/');
+            }}
+          >
+            <LogOut size={20} />
+            <span className="admin-btn-text">Logout</span>
+          </button>
+        </div>
       </div>
       <div className="admin-tabs">
         <button className={`admin-tab${tab === 'poems' ? ' active' : ''}`} onClick={() => setTab('poems')}>
