@@ -10,6 +10,7 @@ export default function PoemsTextTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
@@ -17,28 +18,33 @@ export default function PoemsTextTab() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
-    if (editingId) {
-      // Update existing poem
-      await fetch("/api/poems", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, title, content })
-      });
-    } else {
-      // Add new poem
-      await fetch("/api/poems", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: 'TEXT', title, content })
-      });
+    try {
+      if (editingId) {
+        // Update existing poem
+        await fetch("/api/poems", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: editingId, title, content })
+        });
+      } else {
+        // Add new poem
+        await fetch("/api/poems", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: 'TEXT', title, content })
+        });
+      }
+      
+      setTitle("");
+      setContent("");
+      setEditingId(null);
+      setShowModal(false);
+      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setTitle("");
-    setContent("");
-    setEditingId(null);
-    setShowModal(false);
-    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
   };
 
   const handleEdit = (poem: any) => {
@@ -91,7 +97,9 @@ export default function PoemsTextTab() {
         <form className="admin-form" onSubmit={handleAdd}>
           <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
           <textarea placeholder="Enter Nepali poem text" value={content} onChange={e => setContent(e.target.value)} required />
-          <button className="admin-btn add" type="submit">{editingId ? "Update Poem" : "Add Poem"}</button>
+          <button className="admin-btn add" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (editingId ? "Editing..." : "Adding...") : (editingId ? "Update Poem" : "Add Poem")}
+          </button>
         </form>
       </Modal>
 

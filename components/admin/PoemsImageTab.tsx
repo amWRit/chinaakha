@@ -11,6 +11,7 @@ export default function PoemsImageTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [driveLink, setDriveLink] = useState("");
   const [title, setTitle] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE')));
@@ -37,30 +38,35 @@ export default function PoemsImageTab() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
-    const fileId = extractFileId(driveLink);
-    
-    if (editingId) {
-      // Update existing poem
-      await fetch("/api/poems", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, image: { fileId }, title })
-      });
-    } else {
-      // Add new poem
-      await fetch("/api/poems", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title })
-      });
+    try {
+      const fileId = extractFileId(driveLink);
+      
+      if (editingId) {
+        // Update existing poem
+        await fetch("/api/poems", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: editingId, image: { fileId }, title })
+        });
+      } else {
+        // Add new poem
+        await fetch("/api/poems", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title })
+        });
+      }
+      
+      setDriveLink("");
+      setTitle("");
+      setEditingId(null);
+      setShowModal(false);
+      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE')));
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setDriveLink("");
-    setTitle("");
-    setEditingId(null);
-    setShowModal(false);
-    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE')));
   };
 
   const handleEdit = (poem: any) => {
@@ -128,7 +134,9 @@ export default function PoemsImageTab() {
               required 
             />
           </div>
-          <button className="admin-btn add" type="submit">{editingId ? "Update Poem" : "Add Poem"}</button>
+          <button className="admin-btn add" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (editingId ? "Editing..." : "Adding...") : (editingId ? "Update Poem" : "Add Poem")}
+          </button>
         </form>
       </Modal>
 
