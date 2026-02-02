@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
 import Modal from "./Modal";
 import Markdown from "../Markdown";
+import Toast from "../Toast";
 
 export default function PoemsTextTab() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -12,6 +13,9 @@ export default function PoemsTextTab() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [poemToDelete, setPoemToDelete] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
@@ -46,6 +50,7 @@ export default function PoemsTextTab() {
       setContent("");
       setEditingId(null);
       setShowModal(false);
+      setToastMessage(editingId ? "Poem updated successfully!" : "Poem added successfully!");
       fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
     } finally {
       setIsSubmitting(false);
@@ -66,12 +71,21 @@ export default function PoemsTextTab() {
     setContent("");
   };
 
-  const handleDelete = async (id: string) => {
+  const requestDelete = (id: string) => {
+    setPoemToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!poemToDelete) return;
     await fetch("/api/poems", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
+      body: JSON.stringify({ id: poemToDelete })
     });
+    setShowConfirmModal(false);
+    setPoemToDelete(null);
+    setToastMessage("Poem deleted successfully!");
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
   };
 
@@ -320,7 +334,7 @@ export default function PoemsTextTab() {
                 <button className="admin-btn edit" onClick={() => handleEdit(poem)}>
                   <Pencil size={16} />
                 </button>
-                <button className="admin-btn delete" onClick={() => handleDelete(poem.id)}>
+                <button className="admin-btn delete" onClick={() => requestDelete(poem.id)}>
                   <Trash size={16} />
                 </button>
               </div>
@@ -328,6 +342,17 @@ export default function PoemsTextTab() {
           </li>
         ))}
       </ul>
+
+      {/* Confirm Delete Modal */}
+      <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} title="Confirm Delete">
+        <div style={{ marginBottom: 18 }}>Are you sure you want to delete this poem?</div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <button className="admin-btn" onClick={() => setShowConfirmModal(false)} type="button">Cancel</button>
+          <button className="admin-btn delete" onClick={handleDelete} type="button">Delete</button>
+        </div>
+      </Modal>
+
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
     </div>
   );
 }

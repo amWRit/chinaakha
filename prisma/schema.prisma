@@ -17,7 +17,7 @@ model Poem {
   imageId   String?  @unique // GDriveImageResource.id (nullable for text)
   createdAt DateTime @default(now())
   order     Int      @default(0)
-  image     GDriveImageResource? @relation("PoemImage", fields: [imageId], references: [id])
+  image     GDriveImageResource? @relation("PoemImage", fields: [imageId], references: [id], onDelete: Cascade)
 }
 
 model GDriveImageResource {

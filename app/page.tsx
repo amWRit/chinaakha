@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Instagram, Image as ImageIcon, FileText } from "lucide-react";
+import { Instagram, Image as ImageIcon, FileText, Shield } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
@@ -100,7 +100,16 @@ export default function Home() {
       {showAdmin && (
         <button
           className="admin-btn"
-          style={{ position: 'fixed', top: 24, right: 24, zIndex: 1000 }}
+          style={{ 
+            position: 'fixed', 
+            top: 24, 
+            right: 24, 
+            zIndex: 1000,
+            backgroundColor: '#f59e0b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
           onClick={async () => {
             // Check session
             const res = await fetch('/api/admins', { method: 'GET' });
@@ -111,9 +120,37 @@ export default function Home() {
             }
           }}
         >
-          Admin
+          <Shield size={18} />
+          <span>Admin</span>
         </button>
       )}
+
+      {/* TEMP: Admin Button (Remove Later) */}
+      <button
+        className="admin-btn"
+        style={{ 
+          position: 'fixed', 
+          top: 24, 
+          left: 24, 
+          zIndex: 1000,
+          backgroundColor: '#f59e0b',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+        onClick={async () => {
+          // Check session
+          const res = await fetch('/api/admins', { method: 'GET' });
+          if (res.status === 200 && res.headers.get('x-admin-authenticated') === 'true') {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/admin/login');
+          }
+        }}
+      >
+        <Shield size={18} />
+        <span>Admin</span>
+      </button>
 
       {/* Enhanced Tab Buttons */}
       <div className="tab-container">
