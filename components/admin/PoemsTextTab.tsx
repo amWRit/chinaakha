@@ -78,11 +78,33 @@ export default function PoemsTextTab() {
 
   const handleDelete = async () => {
     if (!poemToDelete) return;
+    
+    // Delete the poem
     await fetch("/api/poems", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: poemToDelete })
     });
+    
+    // Fetch updated poems and reorder them
+    const res = await fetch("/api/poems");
+    const allPoems = await res.json();
+    const textPoems = allPoems.filter((p: any) => p.type === 'TEXT').sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+    
+    // Reorder to fill gaps
+    const updates = textPoems.map((poem: any, index: number) => ({
+      id: poem.id,
+      order: index
+    }));
+    
+    if (updates.length > 0) {
+      await fetch("/api/poems", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates })
+      });
+    }
+    
     setShowConfirmModal(false);
     setPoemToDelete(null);
     setToastMessage("Poem deleted successfully!");
@@ -232,9 +254,10 @@ export default function PoemsTextTab() {
               background: '#f8f8f8', 
               borderRadius: '8px',
               lineHeight: '1.6',
-              color: '#333'
+              color: '#333',
+              whiteSpace: 'pre-wrap'
             }}>
-              <Markdown>{selectedPoem.content}</Markdown>
+              {selectedPoem.content}
             </div>
           </div>
         </Modal>

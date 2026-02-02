@@ -7,6 +7,9 @@ import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
 const ImageLightbox = dynamic(() => import("../components/ImageLightBox"), { ssr: false });
+const AdminFAB = dynamic(() => import("../components/AdminFAB"), { ssr: false });
+const AddTextPoemModal = dynamic(() => import("../components/AddTextPoemModal"), { ssr: false });
+const AddImagePoemModal = dynamic(() => import("../components/AddImagePoemModal"), { ssr: false });
 
 export default function Home() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -17,6 +20,9 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<{ fileId: string; title: string } | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [showTextModal, setShowTextModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const tapCount = useRef(0);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -64,6 +70,23 @@ export default function Home() {
       .then((data) => setPoems(data));
   }, []);
 
+  // Check admin authentication status
+  useEffect(() => {
+    fetch("/api/admins", { method: "GET" })
+      .then((res) => {
+        if (res.status === 200 && res.headers.get("x-admin-authenticated") === "true") {
+          setIsAdminAuthenticated(true);
+        }
+      })
+      .catch(() => setIsAdminAuthenticated(false));
+  }, []);
+
+  const refreshPoems = () => {
+    fetch("/api/poems")
+      .then((res) => res.json())
+      .then((data) => setPoems(data));
+  };
+
   useEffect(() => {
     // Generate randomized grid spans for images
     const imagePoems = poems.filter((p) => p.type === 'IMAGE');
@@ -93,7 +116,7 @@ export default function Home() {
   return (
     <main className="container">
       <div id="logo" onClick={handleLogoTap} style={{ cursor: isMobile ? 'pointer' : undefined }}>
-        <img src="/images/logo_final.png" alt="Chinaakha Logo" />
+        <img src="/images/logos/logo_final.png" alt="Chinaakha Logo" />
       </div>
 
       {/* Admin Button */}
@@ -228,6 +251,28 @@ export default function Home() {
           onClose={closeLightbox}
         />
       )}
+
+      {/* Admin FAB - Only show if authenticated */}
+      {isAdminAuthenticated && (
+        <AdminFAB
+          onAddTextPoem={() => setShowTextModal(true)}
+          onAddImagePoem={() => setShowImageModal(true)}
+        />
+      )}
+
+      {/* Add Text Poem Modal */}
+      <AddTextPoemModal
+        isOpen={showTextModal}
+        onClose={() => setShowTextModal(false)}
+        onSuccess={refreshPoems}
+      />
+
+      {/* Add Image Poem Modal */}
+      <AddImagePoemModal
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        onSuccess={refreshPoems}
+      />
 
       <div className="text">- RANDOM FEELINGS PUT INTO WORDS -</div>
       <div style={{ textAlign: "center", marginTop: 20 }}>

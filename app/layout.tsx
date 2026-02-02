@@ -17,7 +17,48 @@ export const metadata: Metadata = {
   title: "Chinaakha:",
   description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
   icons: {
-    icon: "/images/favicon.ico",
+    icon: "/images/logos/favicon.ico",
+    apple: "/images/logos/apple-touch-icon.png",
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: "/images/logos/favicon-32x32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        url: "/images/logos/favicon-16x16.png",
+      },
+    ],
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Chinaakha",
+  },
+  openGraph: {
+    type: "website",
+    title: "Chinaakha:",
+    description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
+    siteName: "Chinaakha",
+    images: [
+      {
+        url: "/images/logos/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Chinaakha Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Chinaakha:",
+    description: "Nepali poetry site - RANDOM FEELINGS PUT INTO WORDS -",
+    images: ["/images/logos/android-chrome-512x512.png"],
   },
 };
 

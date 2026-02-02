@@ -94,8 +94,10 @@ export default function PoemsImageTab() {
 
   const handleEdit = (poem: any) => {
     setEditingId(poem.id);
-    // Show the file ID in the input when editing
-    setDriveLink(poem.image?.fileId || "");
+    // Build the full shareable link from the file ID
+    const fileId = poem.image?.fileId || "";
+    const shareableLink = fileId ? `https://drive.google.com/file/d/${fileId}/view` : "";
+    setDriveLink(shareableLink);
     setTitle(poem.title || "");
     setShowModal(true);
   };
@@ -118,11 +120,33 @@ export default function PoemsImageTab() {
 
   const handleDelete = async () => {
     if (!poemToDelete) return;
+    
+    // Delete the poem
     await fetch("/api/poems", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: poemToDelete })
     });
+    
+    // Fetch updated poems and reorder them
+    const res = await fetch("/api/poems");
+    const allPoems = await res.json();
+    const imagePoems = allPoems.filter((p: any) => p.type === 'IMAGE').sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+    
+    // Reorder to fill gaps
+    const updates = imagePoems.map((poem: any, index: number) => ({
+      id: poem.id,
+      order: index
+    }));
+    
+    if (updates.length > 0) {
+      await fetch("/api/poems", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates })
+      });
+    }
+    
     setShowConfirmModal(false);
     setPoemToDelete(null);
     setToastMessage("Poem deleted successfully!");

@@ -10,7 +10,7 @@ export default async function PoemsImagesPage() {
   return (
     <main className="container">
       <div id="logo">
-        <img src="/images/logo_final.png" alt="Chinaakha Logo" style={{ marginTop: 25, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+        <img src="/images/logos/logo_final.png" alt="Chinaakha Logo" style={{ marginTop: 25, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
       </div>
       <div>
         {poems.map((poem) => (
