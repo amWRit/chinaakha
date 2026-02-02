@@ -16,7 +16,7 @@ export default function PoemsImageTab() {
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE').sort((a:any, b:any) => (a.order || 0) - (b.order || 0))));
+    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
   }, []);
 
   const extractFileId = (url: string): string => {
@@ -53,11 +53,15 @@ export default function PoemsImageTab() {
           body: JSON.stringify({ id: editingId, image: { fileId }, title })
         });
       } else {
-        // Add new poem
+        // Add new image poem with correct order
+        const poemsRes = await fetch("/api/poems");
+        const allPoems = await poemsRes.json();
+        const imagePoems = allPoems.filter((p:any) => p.type === 'IMAGE');
+        const maxOrder = imagePoems.length > 0 ? Math.max(...imagePoems.map((p:any) => p.order ?? 0)) : -1;
         await fetch("/api/poems", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title })
+          body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title, order: maxOrder + 1 })
         });
       }
       
@@ -65,7 +69,7 @@ export default function PoemsImageTab() {
       setTitle("");
       setEditingId(null);
       setShowModal(false);
-      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE')));
+      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
     } finally {
       setIsSubmitting(false);
     }

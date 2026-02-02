@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
 import Modal from "./Modal";
+import Markdown from "../Markdown";
 
 export default function PoemsTextTab() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -15,13 +16,12 @@ export default function PoemsTextTab() {
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order || 0) - (b.order || 0))));
+    fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
     try {
       if (editingId) {
         // Update existing poem
@@ -31,19 +31,22 @@ export default function PoemsTextTab() {
           body: JSON.stringify({ id: editingId, title, content })
         });
       } else {
-        // Add new poem
+        // Add new poem with correct order
+        const poemsRes = await fetch("/api/poems");
+        const allPoems = await poemsRes.json();
+        const textPoems = allPoems.filter((p:any) => p.type === 'TEXT');
+        const maxOrder = textPoems.length > 0 ? Math.max(...textPoems.map((p:any) => p.order ?? 0)) : -1;
         await fetch("/api/poems", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: 'TEXT', title, content })
+          body: JSON.stringify({ type: 'TEXT', title, content, order: maxOrder + 1 })
         });
       }
-      
       setTitle("");
       setContent("");
       setEditingId(null);
       setShowModal(false);
-      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT')));
+      fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
     } finally {
       setIsSubmitting(false);
     }
@@ -178,12 +181,17 @@ export default function PoemsTextTab() {
         <Plus size={18} />
         <span className="admin-btn-text">Add</span>
       </button>
-      
+
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={handleCloseModal} title={editingId ? "Update Text Poem" : "Add Text Poem"}>
         <form className="admin-form" onSubmit={handleAdd}>
           <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
           <textarea placeholder="Enter Nepali poem text" value={content} onChange={e => setContent(e.target.value)} required />
+          <div style={{ fontSize: '0.98em', marginBottom: 10, color: '#888' }}>
+            <b>Markdown supported:</b> <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">Markdown Guide</a> &nbsp;|&nbsp;
+            <a href="https://markdownlivepreview.com/" target="_blank" rel="noopener noreferrer">Live Preview</a> &nbsp;|&nbsp;
+            <a href="https://word2md.com/" target="_blank" rel="noopener noreferrer">Word2MD</a>
+          </div>
           <button className="admin-btn add" type="submit" disabled={isSubmitting}>
             {isSubmitting ? (editingId ? "Editing..." : "Adding...") : (editingId ? "Update Poem" : "Add Poem")}
           </button>
@@ -209,11 +217,10 @@ export default function PoemsTextTab() {
               padding: '16px', 
               background: '#f8f8f8', 
               borderRadius: '8px',
-              whiteSpace: 'pre-wrap',
               lineHeight: '1.6',
               color: '#333'
             }}>
-              {selectedPoem.content}
+              <Markdown>{selectedPoem.content}</Markdown>
             </div>
           </div>
         </Modal>
