@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
+import { useNepaliTransliteration } from "../lib/useNepaliTransliteration";
+import TransliterationSuggestions from "./TransliterationSuggestions";
 
 interface AddTextPoemModalProps {
   isOpen: boolean;
@@ -13,6 +15,17 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useRomanizedNepali, setUseRomanizedNepali] = useState(false);
+
+  const titleTransliteration = useNepaliTransliteration(title, setTitle, {
+    enabled: useRomanizedNepali,
+    fieldName: 'title',
+  });
+
+  const contentTransliteration = useNepaliTransliteration(content, setContent, {
+    enabled: useRomanizedNepali,
+    fieldName: 'content',
+  });
 
   if (!isOpen) return null;
 
@@ -57,23 +70,58 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          <input
-            type="text"
-            className="modal-input"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+          <div className="romanized-toggle">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5em', margin: 0, padding: 0 }}>
+              <input
+                type="checkbox"
+                checked={useRomanizedNepali}
+                onChange={(e) => {
+                  setUseRomanizedNepali(e.target.checked);
+                  if (!e.target.checked) {
+                    titleTransliteration.clearSuggestions();
+                    contentTransliteration.clearSuggestions();
+                  }
+                }}
+              />
+              <span style={{ color: '#222' }}>Type in Romanized Nepali (e.g., "namaste" → "नमस्ते")</span>
+            </label>
+          </div>
 
-          <textarea
-            className="modal-textarea"
-            placeholder="Write your poem here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={12}
-          />
+          <div className="input-with-suggestions">
+            <input
+              type="text"
+              className="modal-input"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => titleTransliteration.handleChange(e.target.value)}
+              onKeyDown={titleTransliteration.handleKeyDown}
+              required
+            />
+            <TransliterationSuggestions
+              suggestions={titleTransliteration.suggestions}
+              selectedIndex={titleTransliteration.selectedIndex}
+              onSelect={titleTransliteration.applySuggestion}
+              show={titleTransliteration.showSuggestions}
+            />
+          </div>
+
+          <div className="input-with-suggestions">
+            <textarea
+              className="modal-textarea"
+              placeholder="Write your poem here..."
+              value={content}
+              onChange={(e) => contentTransliteration.handleChange(e.target.value)}
+              onKeyDown={contentTransliteration.handleKeyDown}
+              required
+              rows={12}
+            />
+            <TransliterationSuggestions
+              suggestions={contentTransliteration.suggestions}
+              selectedIndex={contentTransliteration.selectedIndex}
+              onSelect={contentTransliteration.applySuggestion}
+              show={contentTransliteration.showSuggestions}
+            />
+          </div>
 
           <div className="modal-actions">
             <button
@@ -89,14 +137,7 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
               className="modal-btn modal-btn-submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                "Adding..."
-              ) : (
-                <>
-                  <Plus size={18} />
-                  <span>Add Poem</span>
-                </>
-              )}
+              {isSubmitting ? "Adding..." : "Add"}
             </button>
           </div>
         </form>
