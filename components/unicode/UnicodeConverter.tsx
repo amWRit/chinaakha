@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Copy, Download, Trash2, FileText, ChevronDown, ChevronUp, MousePointerClick } from "lucide-react";
+import { Copy, Download, Trash2, FileText, ChevronDown, ChevronUp, MousePointerClick, Save } from "lucide-react";
 import { useNepaliTransliteration } from "@/lib/useNepaliTransliteration";
 import TransliterationSuggestions from "../TransliterationSuggestions";
 import UnicodeTips from "./UnicodeTips";
+import SavePoemModal from "../SavePoemModal";
+import dynamic from "next/dynamic";
+const Toast = dynamic(() => import("../Toast"), { ssr: false });
 
 export default function UnicodeConverter() {
   const [romanizedText, setRomanizedText] = useState("");
@@ -14,12 +17,26 @@ export default function UnicodeConverter() {
   const [autoSave, setAutoSave] = useState(true);
   const [copySuccess, setCopySuccess] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const hasLoadedFromStorage = useRef(false);
 
   const transliteration = useNepaliTransliteration(romanizedText, setRomanizedText, {
     enabled: true,
     fieldName: 'unicode-converter',
   });
+
+  // Check admin authentication status
+  useEffect(() => {
+    fetch("/api/admins", { method: "GET" })
+      .then((res) => {
+        if (res.status === 200 && res.headers.get("x-admin-authenticated") === "true") {
+          setIsAdminAuthenticated(true);
+        }
+      })
+      .catch(() => setIsAdminAuthenticated(false));
+  }, []);
 
   // Load from localStorage on mount (before auto-save effect)
   useEffect(() => {
@@ -115,7 +132,7 @@ export default function UnicodeConverter() {
           <div className="pane-header">
             <h3>
               <FileText size={18} />
-              <span className="header-text-long">Romanized Input</span>
+              <span className="header-text-long">Input</span>
               <span className="header-text-short">Input</span>
             </h3>
             <div className="pane-actions">
@@ -156,10 +173,21 @@ export default function UnicodeConverter() {
           <div className="pane-header">
             <h3>
               <FileText size={18} />
-              <span className="header-text-long">Nepali Unicode Output</span>
+              <span className="header-text-long">Output</span>
               <span className="header-text-short">Output</span>
             </h3>
             <div className="pane-actions">
+              {isAdminAuthenticated && (
+                <button 
+                  className="pane-btn pane-btn-primary"
+                  onClick={() => setShowSaveModal(true)}
+                  title="Save as draft poem"
+                  disabled={!nepaliText.trim()}
+                >
+                  <Save size={16} />
+                  <span className="btn-text-desktop">Save as Draft</span>
+                </button>
+              )}
               <button 
                 className={`pane-btn ${copySuccess ? 'pane-btn-success' : ''}`}
                 onClick={handleCopy}
@@ -244,6 +272,20 @@ export default function UnicodeConverter() {
           </div>
         </div>
       )}
+
+      {/* Save Poem Modal */}
+      <SavePoemModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSuccess={() => {
+          setToastMessage("Poem saved to drafts successfully!");
+        }}
+        onError={(message) => setToastMessage(message)}
+        content={nepaliText}
+      />
+
+      {/* Toast Message */}
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
     </div>
   );
 }

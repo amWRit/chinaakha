@@ -220,9 +220,26 @@
   transition: all 0.2s ease;
 }
 
-.pane-btn:hover {
+.pane-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pane-btn:not(:disabled):hover {
   background: #ffeaea;
   transform: translateY(-1px);
+}
+
+.pane-btn-primary {
+  background: #fff;
+  color: #e46c6e;
+  border: 2px solid #fff;
+}
+
+.pane-btn-primary:not(:disabled):hover {
+  background: rgba(255,255,255,0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255,255,255,0.3);
 }
 
 .pane-btn-secondary {
@@ -242,6 +259,17 @@
 
 .pane-btn-success:hover {
   background: #059669;
+}
+
+/* Hide button text on mobile, show icon only */
+@media (max-width: 768px) {
+  .pane-btn .btn-text-desktop {
+    display: none;
+  }
+  
+  .pane-btn {
+    padding: 8px;
+  }
 }
 
 .pane-content {
