@@ -7,9 +7,10 @@ interface AddImagePoemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onError: (message: string) => void;
 }
 
-export default function AddImagePoemModal({ isOpen, onClose, onSuccess }: AddImagePoemModalProps) {
+export default function AddImagePoemModal({ isOpen, onClose, onSuccess, onError }: AddImagePoemModalProps) {
   const [title, setTitle] = useState("");
   const [driveLink, setDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +56,7 @@ export default function AddImagePoemModal({ isOpen, onClose, onSuccess }: AddIma
           type: "IMAGE",
           title,
           image: { fileId },
+          status: "DRAFT",
           order: maxOrder + 1
         }),
       });
@@ -64,9 +66,12 @@ export default function AddImagePoemModal({ isOpen, onClose, onSuccess }: AddIma
         setDriveLink("");
         onSuccess();
         onClose();
+      } else {
+        onError("Failed to add image poem. Please try again.");
       }
     } catch (error) {
       console.error("Error adding image poem:", error);
+      onError("An error occurred while adding the image poem.");
     } finally {
       setIsSubmitting(false);
     }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
+import { Pencil, Trash, Plus, GripVertical, FileText, Eye, Archive, BookOpenCheck, BookDashed, FileEdit, CheckCircle } from "lucide-react";
 import Modal from "./Modal";
 import Markdown from "../Markdown";
 import Toast from "../Toast";
+import { useNepaliTransliteration } from "../../lib/useNepaliTransliteration";
+import TransliterationSuggestions from "../TransliterationSuggestions";
 
 export default function PoemsTextTab() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -18,6 +20,19 @@ export default function PoemsTextTab() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [useRomanizedNepali, setUseRomanizedNepali] = useState(false);
+  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('ALL');
+
+  const titleTransliteration = useNepaliTransliteration(title, setTitle, {
+    enabled: useRomanizedNepali,
+    fieldName: 'title',
+  });
+
+  const contentTransliteration = useNepaliTransliteration(content, setContent, {
+    enabled: useRomanizedNepali,
+    fieldName: 'content',
+  });
 
   useEffect(() => {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
@@ -32,7 +47,7 @@ export default function PoemsTextTab() {
         await fetch("/api/poems", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingId, title, content })
+          body: JSON.stringify({ id: editingId, title, content, status })
         });
       } else {
         // Add new poem with correct order
@@ -43,7 +58,7 @@ export default function PoemsTextTab() {
         await fetch("/api/poems", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: 'TEXT', title, content, order: maxOrder + 1 })
+          body: JSON.stringify({ type: 'TEXT', title, content, status, order: maxOrder + 1 })
         });
       }
       setTitle("");
@@ -59,8 +74,10 @@ export default function PoemsTextTab() {
 
   const handleEdit = (poem: any) => {
     setEditingId(poem.id);
+    setUseRomanizedNepali(false);
     setTitle(poem.title || "");
     setContent(poem.content || "");
+    setStatus(poem.status || 'DRAFT');
     setShowModal(true);
   };
 
@@ -69,6 +86,10 @@ export default function PoemsTextTab() {
     setEditingId(null);
     setTitle("");
     setContent("");
+    setStatus('DRAFT');
+    setUseRomanizedNepali(false);
+    titleTransliteration.clearSuggestions();
+    contentTransliteration.clearSuggestions();
   };
 
   const requestDelete = (id: string) => {
@@ -213,16 +234,127 @@ export default function PoemsTextTab() {
 
   return (
     <div>
-      <button className="admin-btn add" onClick={() => setShowModal(true)}>
-        <Plus size={18} />
-        <span className="admin-btn-text">Add</span>
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+        {/* Status Filter */}
+        <select 
+          value={filterStatus} 
+          onChange={(e) => setFilterStatus(e.target.value as 'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')}
+          style={{
+            padding: '10px 20px',
+            paddingRight: '36px',
+            borderRadius: '8px',
+            border: '2px solid #e46c6e',
+            background: '#fff',
+            color: '#e46c6e',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            outline: 'none',
+            minWidth: '150px'
+          }}
+        >
+          <option value="ALL">All Poems</option>
+          <option value="DRAFT">Draft</option>
+          <option value="PUBLISHED">Published</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+
+        <button className="admin-btn add" onClick={() => setShowModal(true)}>
+          <Plus size={18} />
+          <span className="admin-btn-text">Add</span>
+        </button>
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={handleCloseModal} title={editingId ? "Update Text Poem" : "Add Text Poem"}>
         <form className="admin-form" onSubmit={handleAdd}>
-          <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
-          <textarea placeholder="Enter Nepali poem text" value={content} onChange={e => setContent(e.target.value)} required />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75em', flexWrap: 'wrap', marginBottom: 0 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, padding: 0, color: '#333', fontSize: '0.95rem', fontWeight: 500 }}>
+              <input
+                type="checkbox"
+                checked={useRomanizedNepali}
+                onChange={(e) => {
+                  setUseRomanizedNepali(e.target.checked);
+                  if (!e.target.checked) {
+                    titleTransliteration.clearSuggestions();
+                    contentTransliteration.clearSuggestions();
+                  }
+                }}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <span>Romanized Nepali</span>
+            </label>
+            <a href="/tools/unicode" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9em', color: '#666', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+              Unicode Tool
+            </a>
+          </div>
+
+          <div style={{ marginBottom: 0}}>
+            <div className="segmented-control status-selector">
+              <div className="status-slider" style={{ 
+                transform: `translateX(${status === 'DRAFT' ? 0 : status === 'PUBLISHED' ? 100 : 200}%)` 
+              }} />
+              <button
+                type="button"
+                className={`segment segment-draft ${status === 'DRAFT' ? 'active' : ''}`}
+                onClick={() => setStatus('DRAFT')}
+                title="Draft"
+              >
+                <FileEdit size={18} />
+              </button>
+              <button
+                type="button"
+                className={`segment segment-published ${status === 'PUBLISHED' ? 'active' : ''}`}
+                onClick={() => setStatus('PUBLISHED')}
+                title="Published"
+              >
+                <CheckCircle size={18} />
+              </button>
+              <button
+                type="button"
+                className={`segment segment-archived ${status === 'ARCHIVED' ? 'active' : ''}`}
+                onClick={() => setStatus('ARCHIVED')}
+                title="Archived"
+              >
+                <Archive size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="input-with-suggestions" style={{ width: '100%' }}>
+            <input 
+              placeholder="Title" 
+              value={title} 
+              onChange={(e) => titleTransliteration.handleChange(e.target.value)}
+              onKeyDown={titleTransliteration.handleKeyDown}
+              required 
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+            <TransliterationSuggestions
+              suggestions={titleTransliteration.suggestions}
+              selectedIndex={titleTransliteration.selectedIndex}
+              onSelect={titleTransliteration.applySuggestion}
+              show={titleTransliteration.showSuggestions}
+            />
+          </div>
+
+          <div className="input-with-suggestions" style={{ width: '100%' }}>
+            <textarea 
+              placeholder="Enter Nepali poem text" 
+              value={content} 
+              onChange={(e) => contentTransliteration.handleChange(e.target.value)}
+              onKeyDown={contentTransliteration.handleKeyDown}
+              required 
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+            <TransliterationSuggestions
+              suggestions={contentTransliteration.suggestions}
+              selectedIndex={contentTransliteration.selectedIndex}
+              onSelect={contentTransliteration.applySuggestion}
+              show={contentTransliteration.showSuggestions}
+            />
+          </div>
+
           <div style={{ fontSize: '0.98em', marginBottom: 10, color: '#888' }}>
             <b>Markdown supported:</b> <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">Markdown Guide</a> &nbsp;|&nbsp;
             <a href="https://markdownlivepreview.com/" target="_blank" rel="noopener noreferrer">Live Preview</a> &nbsp;|&nbsp;
@@ -264,7 +396,7 @@ export default function PoemsTextTab() {
       )}
 
       <ul className="admin-list">
-        {poems.map((poem, index) => (
+        {poems.filter(poem => filterStatus === 'ALL' || poem.status === filterStatus).map((poem, index) => (
           <li 
             key={poem.id}
             draggable
@@ -278,6 +410,7 @@ export default function PoemsTextTab() {
               alignItems: 'stretch',
               background: 'rgba(255,255,255,0.15)',
               border: '1px solid rgba(255,255,255,0.2)',
+              borderRight: `4px solid ${poem.status === 'PUBLISHED' ? '#10b981' : poem.status === 'DRAFT' ? '#f59e0b' : '#9ca3af'}`,
               borderRadius: '10px',
               marginBottom: '12px',
               padding: '12px 16px 12px 0',

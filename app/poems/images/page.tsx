@@ -2,7 +2,10 @@ import { prisma } from '@/lib/prisma';
 
 export default async function PoemsImagesPage() {
   const poems = await prisma.poem.findMany({
-    where: { type: 'IMAGE' },
+    where: { 
+      type: 'IMAGE',
+      status: 'PUBLISHED'
+    },
     orderBy: { order: 'asc' },
     include: { image: true },
   });

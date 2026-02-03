@@ -9,9 +9,10 @@ interface AddTextPoemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onError: (message: string) => void;
 }
 
-export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddTextPoemModalProps) {
+export default function AddTextPoemModal({ isOpen, onClose, onSuccess, onError }: AddTextPoemModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,7 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
       const response = await fetch("/api/poems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "TEXT", title, content, order: maxOrder + 1 }),
+        body: JSON.stringify({ type: "TEXT", title, content, status: "DRAFT", order: maxOrder + 1 }),
       });
 
       if (response.ok) {
@@ -51,9 +52,12 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
         setContent("");
         onSuccess();
         onClose();
+      } else {
+        onError("Failed to add poem. Please try again.");
       }
     } catch (error) {
       console.error("Error adding poem:", error);
+      onError("An error occurred while adding the poem.");
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +74,7 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          <div className="romanized-toggle">
+          <div className="romanized-toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75em', flexWrap: 'wrap' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5em', margin: 0, padding: 0 }}>
               <input
                 type="checkbox"
@@ -83,8 +87,11 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
                   }
                 }}
               />
-              <span style={{ color: '#222' }}>Type in Romanized Nepali (e.g., "namaste" → "नमस्ते")</span>
+              <span style={{ color: '#222' }}>Romanized Nepali</span>
             </label>
+            <a href="/tools/unicode" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9em', color: '#666', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+              Unicode Tool
+            </a>
           </div>
 
           <div className="input-with-suggestions">

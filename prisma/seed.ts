@@ -22,6 +22,7 @@ async function main() {
         title,
         content,
         type: 'TEXT',
+        status: order === 0 ? 'DRAFT' : 'PUBLISHED', // First text poem is draft
         order,
       },
     });
@@ -45,6 +46,7 @@ async function main() {
       data: {
         title: `Image ${i + 1}`,
         type: 'IMAGE',
+        status: i === 0 ? 'DRAFT' : 'PUBLISHED', // First image poem is draft
         imageId: image.id,
         order: textPoems.length + i,
       },

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Instagram, Image as ImageIcon, FileText, Shield } from "lucide-react";
+import { Image as ImageIcon, FileText, Shield, Type } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
@@ -10,6 +10,7 @@ const ImageLightbox = dynamic(() => import("../components/ImageLightBox"), { ssr
 const AdminFAB = dynamic(() => import("../components/AdminFAB"), { ssr: false });
 const AddTextPoemModal = dynamic(() => import("../components/AddTextPoemModal"), { ssr: false });
 const AddImagePoemModal = dynamic(() => import("../components/AddImagePoemModal"), { ssr: false });
+const Toast = dynamic(() => import("../components/Toast"), { ssr: false });
 
 export default function Home() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -19,10 +20,12 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ fileId: string; title: string } | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showUnicode, setShowUnicode] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [showTextModal, setShowTextModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const tapCount = useRef(0);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -34,15 +37,16 @@ export default function Home() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Desktop: listen for typing 'admin'
+  // Desktop: listen for typing 'admin' or 'ruma'
   useEffect(() => {
     if (isMobile) return;
     let buffer = '';
     const handler = (e: KeyboardEvent) => {
       buffer += e.key.toLowerCase();
       if (buffer.length > 5) buffer = buffer.slice(-5);
-      if (buffer === 'admin') {
+      if (buffer.endsWith('admin') || buffer.endsWith('ruma')) {
         setShowAdmin(true);
+        setShowUnicode(true);
         buffer = '';
       }
     };
@@ -60,6 +64,7 @@ export default function Home() {
     }, 1000);
     if (tapCount.current === 3) {
       setShowAdmin(true);
+      setShowUnicode(true);
       tapCount.current = 0;
     }
   };
@@ -67,7 +72,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/poems")
       .then((res) => res.json())
-      .then((data) => setPoems(data));
+      .then((data) => setPoems(data.filter((p: any) => p.status === 'PUBLISHED')));
   }, []);
 
   // Check admin authentication status
@@ -84,7 +89,7 @@ export default function Home() {
   const refreshPoems = () => {
     fetch("/api/poems")
       .then((res) => res.json())
-      .then((data) => setPoems(data));
+      .then((data) => setPoems(data.filter((p: any) => p.status === 'PUBLISHED')));
   };
 
   useEffect(() => {
@@ -175,6 +180,46 @@ export default function Home() {
         <span>Admin</span>
       </button>
 
+      {/* Unicode Tool Button */}
+      {showUnicode && (
+        <button
+          className="unicode-btn"
+          style={{ 
+          position: 'fixed', 
+          top: 24, 
+          left: 160, 
+          zIndex: 1000,
+          backgroundColor: '#e46c6e',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '10px 16px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 2px 8px rgba(228,108,110,0.3)',
+          transition: 'all 0.2s ease'
+        }}
+        onClick={() => router.push('/tools/unicode')}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#d35d5f';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(228,108,110,0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#e46c6e';
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(228,108,110,0.3)';
+        }}
+      >
+        <Type size={18} />
+        <span>Unicode</span>
+      </button>
+      )}
+
       {/* Enhanced Tab Buttons */}
       <div className="tab-container">
         <div className="tab-wrapper">
@@ -212,7 +257,7 @@ export default function Home() {
               className="poem-card-wrapper"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <TextPoem content={poem.content} />
+              <TextPoem content={poem.content} title={poem.title} createdAt={poem.createdAt} />
             </div>
           ))}
           {count < textPoems.length && (
@@ -264,15 +309,26 @@ export default function Home() {
       <AddTextPoemModal
         isOpen={showTextModal}
         onClose={() => setShowTextModal(false)}
-        onSuccess={refreshPoems}
+        onSuccess={() => {
+          refreshPoems();
+          setToastMessage("Poem added to drafts successfully!");
+        }}
+        onError={(message) => setToastMessage(message)}
       />
 
       {/* Add Image Poem Modal */}
       <AddImagePoemModal
         isOpen={showImageModal}
         onClose={() => setShowImageModal(false)}
-        onSuccess={refreshPoems}
+        onSuccess={() => {
+          refreshPoems();
+          setToastMessage("Image poem added to drafts successfully!");
+        }}
+        onError={(message) => setToastMessage(message)}
       />
+
+      {/* Toast Message */}
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
 
       <div className="text">- RANDOM FEELINGS PUT INTO WORDS -</div>
       <div style={{ textAlign: "center", marginTop: 20 }}>
@@ -284,7 +340,11 @@ export default function Home() {
             rel="noopener noreferrer"
             className="instagram-link"
           >
-            <Instagram size={28} color="#fff" />
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
           </a>
         </div>
       </div>

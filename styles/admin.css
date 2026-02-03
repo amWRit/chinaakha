@@ -240,6 +240,10 @@ body.admin {
     display: none;
   }
   
+  .status-text {
+    display: none !important;
+  }
+  
   .admin-tabs {
     width: 100%;
   }
@@ -298,7 +302,6 @@ body.admin {
   background: #fff;
   color: #e46c6e;
   border: 2px solid #e46c6e;
-  margin-bottom: 16px;
   margin-left: auto;
   padding: 10px 20px;
   font-size: 1rem;
@@ -328,7 +331,8 @@ body.admin {
 }
 
 .admin-form input,
-.admin-form textarea {
+.admin-form textarea,
+.admin-form select {
   padding: 12px 16px;
   border-radius: 8px;
   border: 2px solid #e46c6e;
@@ -337,10 +341,23 @@ body.admin {
   color: #333;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-form select {
+  padding: 12px 40px 12px 16px;
+  line-height: normal;
+  height: auto;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
 }
 
 .admin-form input:focus,
-.admin-form textarea:focus {
+.admin-form textarea:focus,
+.admin-form select:focus {
   outline: none;
   border-color: #e46c6e;
   box-shadow: 0 0 0 3px rgba(228,108,110,0.1);
@@ -349,6 +366,144 @@ body.admin {
 .admin-form textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+/* Circular color filter buttons (for status filtering in tabs) */
+.segmented-control .segment {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  position: relative;
+}
+
+.segmented-control .segment:hover {
+  background: rgba(228, 108, 110, 0.1);
+  transform: scale(1.05);
+}
+
+.segmented-control .segment.active {
+  background: #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: scale(1.1);
+}
+
+.segmented-control .segment::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.segmented-control .segment:not(.segment-draft):not(.segment-published):not(.segment-archived)::before {
+  background-color: #e46c6e;
+}
+
+.segmented-control .segment-draft::before {
+  background-color: #f59e0b;
+}
+
+.segmented-control .segment-published::before {
+  background-color: #10b981;
+}
+
+.segmented-control .segment-archived::before {
+  background-color: #9ca3af;
+}
+
+.segmented-control .segment.active::before {
+  width: 24px;
+  height: 24px;
+}
+
+/* Override for status selector with text (in modals) */
+.status-selector {
+  position: relative;
+}
+
+.status-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  height: calc(100% - 8px);
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.status-selector .segment {
+  width: auto;
+  height: auto;
+  padding: 10px;
+  border-radius: 6px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-selector .segment::before {
+  display: none;
+}
+
+.status-selector .segment {
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transform: none !important;
+  background: transparent;
+}
+
+.status-selector .segment:hover {
+  color: #e46c6e;
+  transform: none !important;
+  background: transparent;
+}
+
+.status-selector .segment.active {
+  background: transparent;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.status-selector .segment-draft.active {
+  color: #f59e0b;
+  border: none;
+}
+
+.status-selector .segment-published.active {
+  color: #10b981;
+  border: none;
+}
+
+.status-selector .segment-archived.active {
+  color: #9ca3af;
+  border: none;
 }
 
 .admin-form input::placeholder,
