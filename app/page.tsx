@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Instagram, Image as ImageIcon, FileText, Shield } from "lucide-react";
+import { Instagram, Image as ImageIcon, FileText, Shield, Type } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
@@ -173,6 +173,44 @@ export default function Home() {
       >
         <Shield size={18} />
         <span>Admin</span>
+      </button>
+
+      {/* Unicode Tool Button */}
+      <button
+        className="unicode-btn"
+        style={{ 
+          position: 'fixed', 
+          top: 24, 
+          left: 160, 
+          zIndex: 1000,
+          backgroundColor: '#e46c6e',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '10px 16px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 2px 8px rgba(228,108,110,0.3)',
+          transition: 'all 0.2s ease'
+        }}
+        onClick={() => router.push('/tools/unicode')}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#d35d5f';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(228,108,110,0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#e46c6e';
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(228,108,110,0.3)';
+        }}
+      >
+        <Type size={18} />
+        <span>Unicode</span>
       </button>
 
       {/* Enhanced Tab Buttons */}
