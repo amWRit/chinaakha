@@ -238,7 +238,7 @@ export default function PoemsTextTab() {
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={handleCloseModal} title={editingId ? "Update Text Poem" : "Add Text Poem"}>
         <form className="admin-form" onSubmit={handleAdd}>
-          <div style={{ marginBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75em', flexWrap: 'wrap', marginBottom: 0 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, padding: 0, color: '#333', fontSize: '0.95rem', fontWeight: 500 }}>
               <input
                 type="checkbox"
@@ -252,8 +252,11 @@ export default function PoemsTextTab() {
                 }}
                 style={{ width: '18px', height: '18px', cursor: 'pointer' }}
               />
-              <span>Type in Romanized Nepali (e.g., "namaste" → "नमस्ते")</span>
+              <span>Romanized Nepali</span>
             </label>
+            <a href="/tools/unicode" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9em', color: '#666', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+              Unicode Tool
+            </a>
           </div>
 
           <div className="input-with-suggestions" style={{ width: '100%' }}>
