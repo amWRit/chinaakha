@@ -19,6 +19,7 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ fileId: string; title: string } | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showUnicode, setShowUnicode] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [showTextModal, setShowTextModal] = useState(false);
@@ -34,15 +35,16 @@ export default function Home() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Desktop: listen for typing 'admin'
+  // Desktop: listen for typing 'admin' or 'ruma'
   useEffect(() => {
     if (isMobile) return;
     let buffer = '';
     const handler = (e: KeyboardEvent) => {
       buffer += e.key.toLowerCase();
       if (buffer.length > 5) buffer = buffer.slice(-5);
-      if (buffer === 'admin') {
+      if (buffer.endsWith('admin') || buffer.endsWith('ruma')) {
         setShowAdmin(true);
+        setShowUnicode(true);
         buffer = '';
       }
     };
@@ -60,6 +62,7 @@ export default function Home() {
     }, 1000);
     if (tapCount.current === 3) {
       setShowAdmin(true);
+      setShowUnicode(true);
       tapCount.current = 0;
     }
   };
@@ -176,9 +179,10 @@ export default function Home() {
       </button>
 
       {/* Unicode Tool Button */}
-      <button
-        className="unicode-btn"
-        style={{ 
+      {showUnicode && (
+        <button
+          className="unicode-btn"
+          style={{ 
           position: 'fixed', 
           top: 24, 
           left: 160, 
@@ -212,6 +216,7 @@ export default function Home() {
         <Type size={18} />
         <span>Unicode</span>
       </button>
+      )}
 
       {/* Enhanced Tab Buttons */}
       <div className="tab-container">

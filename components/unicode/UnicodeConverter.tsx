@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Copy, Download, Trash2, FileText, ChevronDown, ChevronUp, MousePointerClick } from "lucide-react";
 import { useNepaliTransliteration } from "@/lib/useNepaliTransliteration";
 import TransliterationSuggestions from "../TransliterationSuggestions";
@@ -13,26 +13,31 @@ export default function UnicodeConverter() {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const hasLoadedFromStorage = useRef(false);
 
   const transliteration = useNepaliTransliteration(romanizedText, setRomanizedText, {
     enabled: true,
     fieldName: 'unicode-converter',
   });
 
+  // Load from localStorage on mount (before auto-save effect)
+  useEffect(() => {
+    if (!hasLoadedFromStorage.current) {
+      const saved = localStorage.getItem('unicode-converter-text');
+      if (saved) {
+        setRomanizedText(saved);
+      }
+      hasLoadedFromStorage.current = true;
+    }
+  }, []);
+
   // Auto-save to localStorage
   useEffect(() => {
-    if (autoSave) {
+    if (autoSave && hasLoadedFromStorage.current) {
       localStorage.setItem('unicode-converter-text', romanizedText);
     }
   }, [romanizedText, autoSave]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('unicode-converter-text');
-    if (saved) {
-      setRomanizedText(saved);
-    }
-  }, []);
 
   // Update Nepali text whenever romanized text changes
   useEffect(() => {
@@ -62,10 +67,16 @@ export default function UnicodeConverter() {
   };
 
   const handleClear = () => {
-    if (romanizedText && !confirm('Clear all text?')) return;
+    if (romanizedText) {
+      setShowClearModal(true);
+    }
+  };
+
+  const confirmClear = () => {
     setRomanizedText("");
     setNepaliText("");
     localStorage.removeItem('unicode-converter-text');
+    setShowClearModal(false);
   };
 
   const handleSelectAll = () => {
@@ -209,6 +220,30 @@ export default function UnicodeConverter() {
           <span>Words: {wordCount}</span>
         </div>
       </div>
+
+      {/* Clear Confirmation Modal */}
+      {showClearModal && (
+        <div className="unicode-modal-overlay" onClick={() => setShowClearModal(false)}>
+          <div className="unicode-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Clear All Text?</h3>
+            <p>This will clear all your input and output text. This action cannot be undone.</p>
+            <div className="unicode-modal-actions">
+              <button 
+                className="unicode-modal-btn unicode-modal-btn-cancel"
+                onClick={() => setShowClearModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="unicode-modal-btn unicode-modal-btn-confirm"
+                onClick={confirmClear}
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
