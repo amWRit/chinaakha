@@ -3,6 +3,8 @@ import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
 import Modal from "./Modal";
 import Markdown from "../Markdown";
 import Toast from "../Toast";
+import { useNepaliTransliteration } from "../../lib/useNepaliTransliteration";
+import TransliterationSuggestions from "../TransliterationSuggestions";
 
 export default function PoemsTextTab() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -18,6 +20,17 @@ export default function PoemsTextTab() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [useRomanizedNepali, setUseRomanizedNepali] = useState(false);
+
+  const titleTransliteration = useNepaliTransliteration(title, setTitle, {
+    enabled: useRomanizedNepali,
+    fieldName: 'title',
+  });
+
+  const contentTransliteration = useNepaliTransliteration(content, setContent, {
+    enabled: useRomanizedNepali,
+    fieldName: 'content',
+  });
 
   useEffect(() => {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'TEXT').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
@@ -59,6 +72,7 @@ export default function PoemsTextTab() {
 
   const handleEdit = (poem: any) => {
     setEditingId(poem.id);
+    setUseRomanizedNepali(false);
     setTitle(poem.title || "");
     setContent(poem.content || "");
     setShowModal(true);
@@ -69,6 +83,9 @@ export default function PoemsTextTab() {
     setEditingId(null);
     setTitle("");
     setContent("");
+    setUseRomanizedNepali(false);
+    titleTransliteration.clearSuggestions();
+    contentTransliteration.clearSuggestions();
   };
 
   const requestDelete = (id: string) => {
@@ -221,8 +238,58 @@ export default function PoemsTextTab() {
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={handleCloseModal} title={editingId ? "Update Text Poem" : "Add Text Poem"}>
         <form className="admin-form" onSubmit={handleAdd}>
-          <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
-          <textarea placeholder="Enter Nepali poem text" value={content} onChange={e => setContent(e.target.value)} required />
+          <div style={{ marginBottom: 0 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, padding: 0, color: '#333', fontSize: '0.95rem', fontWeight: 500 }}>
+              <input
+                type="checkbox"
+                checked={useRomanizedNepali}
+                onChange={(e) => {
+                  setUseRomanizedNepali(e.target.checked);
+                  if (!e.target.checked) {
+                    titleTransliteration.clearSuggestions();
+                    contentTransliteration.clearSuggestions();
+                  }
+                }}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <span>Type in Romanized Nepali (e.g., "namaste" → "नमस्ते")</span>
+            </label>
+          </div>
+
+          <div className="input-with-suggestions" style={{ width: '100%' }}>
+            <input 
+              placeholder="Title" 
+              value={title} 
+              onChange={(e) => titleTransliteration.handleChange(e.target.value)}
+              onKeyDown={titleTransliteration.handleKeyDown}
+              required 
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+            <TransliterationSuggestions
+              suggestions={titleTransliteration.suggestions}
+              selectedIndex={titleTransliteration.selectedIndex}
+              onSelect={titleTransliteration.applySuggestion}
+              show={titleTransliteration.showSuggestions}
+            />
+          </div>
+
+          <div className="input-with-suggestions" style={{ width: '100%' }}>
+            <textarea 
+              placeholder="Enter Nepali poem text" 
+              value={content} 
+              onChange={(e) => contentTransliteration.handleChange(e.target.value)}
+              onKeyDown={contentTransliteration.handleKeyDown}
+              required 
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+            <TransliterationSuggestions
+              suggestions={contentTransliteration.suggestions}
+              selectedIndex={contentTransliteration.selectedIndex}
+              onSelect={contentTransliteration.applySuggestion}
+              show={contentTransliteration.showSuggestions}
+            />
+          </div>
+
           <div style={{ fontSize: '0.98em', marginBottom: 10, color: '#888' }}>
             <b>Markdown supported:</b> <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer">Markdown Guide</a> &nbsp;|&nbsp;
             <a href="https://markdownlivepreview.com/" target="_blank" rel="noopener noreferrer">Live Preview</a> &nbsp;|&nbsp;
