@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash, Plus, GripVertical, FileText, Eye, Archive, BookOpenCheck, BookDashed } from "lucide-react";
+import { Pencil, Trash, Plus, GripVertical, FileText, Eye, Archive, BookOpenCheck, BookDashed, FileEdit, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Modal from "./Modal";
 import Toast from "../Toast";
@@ -306,27 +306,33 @@ export default function PoemsImageTab() {
             </div>
           )}
           <div style={{ marginBottom: 0 }}>
-            <div className="segmented-control">
+            <div className="segmented-control status-selector">
+              <div className="status-slider" style={{ 
+                transform: `translateX(${status === 'DRAFT' ? 0 : status === 'PUBLISHED' ? 100 : 200}%)` 
+              }} />
               <button
                 type="button"
                 className={`segment segment-draft ${status === 'DRAFT' ? 'active' : ''}`}
                 onClick={() => setStatus('DRAFT')}
+                title="Draft"
               >
-                Draft
+                <FileEdit size={18} />
               </button>
               <button
                 type="button"
                 className={`segment segment-published ${status === 'PUBLISHED' ? 'active' : ''}`}
                 onClick={() => setStatus('PUBLISHED')}
+                title="Published"
               >
-                Published
+                <CheckCircle size={18} />
               </button>
               <button
                 type="button"
                 className={`segment segment-archived ${status === 'ARCHIVED' ? 'active' : ''}`}
                 onClick={() => setStatus('ARCHIVED')}
+                title="Archived"
               >
-                Archived
+                <Archive size={18} />
               </button>
             </div>
           </div>

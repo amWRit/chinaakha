@@ -9,9 +9,10 @@ interface AddTextPoemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onError: (message: string) => void;
 }
 
-export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddTextPoemModalProps) {
+export default function AddTextPoemModal({ isOpen, onClose, onSuccess, onError }: AddTextPoemModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,9 +52,12 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
         setContent("");
         onSuccess();
         onClose();
+      } else {
+        onError("Failed to add poem. Please try again.");
       }
     } catch (error) {
       console.error("Error adding poem:", error);
+      onError("An error occurred while adding the poem.");
     } finally {
       setIsSubmitting(false);
     }

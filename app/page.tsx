@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Instagram, Image as ImageIcon, FileText, Shield, Type } from "lucide-react";
+import { Image as ImageIcon, FileText, Shield, Type } from "lucide-react";
 import dynamic from "next/dynamic";
 const TextPoem = dynamic(() => import("../components/TextPoem"), { ssr: false });
 const ImagePoem = dynamic(() => import("../components/ImagePoem"), { ssr: false });
@@ -10,6 +10,7 @@ const ImageLightbox = dynamic(() => import("../components/ImageLightBox"), { ssr
 const AdminFAB = dynamic(() => import("../components/AdminFAB"), { ssr: false });
 const AddTextPoemModal = dynamic(() => import("../components/AddTextPoemModal"), { ssr: false });
 const AddImagePoemModal = dynamic(() => import("../components/AddImagePoemModal"), { ssr: false });
+const Toast = dynamic(() => import("../components/Toast"), { ssr: false });
 
 export default function Home() {
   const [poems, setPoems] = useState<any[]>([]);
@@ -24,6 +25,7 @@ export default function Home() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [showTextModal, setShowTextModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const tapCount = useRef(0);
   const tapTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -255,7 +257,7 @@ export default function Home() {
               className="poem-card-wrapper"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <TextPoem content={poem.content} />
+              <TextPoem content={poem.content} title={poem.title} createdAt={poem.createdAt} />
             </div>
           ))}
           {count < textPoems.length && (
@@ -307,15 +309,26 @@ export default function Home() {
       <AddTextPoemModal
         isOpen={showTextModal}
         onClose={() => setShowTextModal(false)}
-        onSuccess={refreshPoems}
+        onSuccess={() => {
+          refreshPoems();
+          setToastMessage("Poem added to drafts successfully!");
+        }}
+        onError={(message) => setToastMessage(message)}
       />
 
       {/* Add Image Poem Modal */}
       <AddImagePoemModal
         isOpen={showImageModal}
         onClose={() => setShowImageModal(false)}
-        onSuccess={refreshPoems}
+        onSuccess={() => {
+          refreshPoems();
+          setToastMessage("Image poem added to drafts successfully!");
+        }}
+        onError={(message) => setToastMessage(message)}
       />
+
+      {/* Toast Message */}
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
 
       <div className="text">- RANDOM FEELINGS PUT INTO WORDS -</div>
       <div style={{ textAlign: "center", marginTop: 20 }}>
@@ -327,7 +340,11 @@ export default function Home() {
             rel="noopener noreferrer"
             className="instagram-link"
           >
-            <Instagram size={28} color="#fff" />
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
           </a>
         </div>
       </div>
