@@ -70,7 +70,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/poems")
       .then((res) => res.json())
-      .then((data) => setPoems(data));
+      .then((data) => setPoems(data.filter((p: any) => p.status === 'PUBLISHED')));
   }, []);
 
   // Check admin authentication status
@@ -87,7 +87,7 @@ export default function Home() {
   const refreshPoems = () => {
     fetch("/api/poems")
       .then((res) => res.json())
-      .then((data) => setPoems(data));
+      .then((data) => setPoems(data.filter((p: any) => p.status === 'PUBLISHED')));
   };
 
   useEffect(() => {

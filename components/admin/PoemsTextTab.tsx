@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
+import { Pencil, Trash, Plus, GripVertical, FileText, Eye, Archive, BookOpenCheck, BookDashed } from "lucide-react";
 import Modal from "./Modal";
 import Markdown from "../Markdown";
 import Toast from "../Toast";
@@ -21,6 +21,7 @@ export default function PoemsTextTab() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [useRomanizedNepali, setUseRomanizedNepali] = useState(false);
+  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT');
 
   const titleTransliteration = useNepaliTransliteration(title, setTitle, {
     enabled: useRomanizedNepali,
@@ -45,7 +46,7 @@ export default function PoemsTextTab() {
         await fetch("/api/poems", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingId, title, content })
+          body: JSON.stringify({ id: editingId, title, content, status })
         });
       } else {
         // Add new poem with correct order
@@ -56,7 +57,7 @@ export default function PoemsTextTab() {
         await fetch("/api/poems", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: 'TEXT', title, content, order: maxOrder + 1 })
+          body: JSON.stringify({ type: 'TEXT', title, content, status, order: maxOrder + 1 })
         });
       }
       setTitle("");
@@ -75,6 +76,7 @@ export default function PoemsTextTab() {
     setUseRomanizedNepali(false);
     setTitle(poem.title || "");
     setContent(poem.content || "");
+    setStatus(poem.status || 'DRAFT');
     setShowModal(true);
   };
 
@@ -83,6 +85,7 @@ export default function PoemsTextTab() {
     setEditingId(null);
     setTitle("");
     setContent("");
+    setStatus('DRAFT');
     setUseRomanizedNepali(false);
     titleTransliteration.clearSuggestions();
     contentTransliteration.clearSuggestions();
@@ -259,6 +262,32 @@ export default function PoemsTextTab() {
             </a>
           </div>
 
+          <div style={{ marginBottom: 0}}>
+            <div className="segmented-control">
+              <button
+                type="button"
+                className={`segment segment-draft ${status === 'DRAFT' ? 'active' : ''}`}
+                onClick={() => setStatus('DRAFT')}
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                className={`segment segment-published ${status === 'PUBLISHED' ? 'active' : ''}`}
+                onClick={() => setStatus('PUBLISHED')}
+              >
+                Published
+              </button>
+              <button
+                type="button"
+                className={`segment segment-archived ${status === 'ARCHIVED' ? 'active' : ''}`}
+                onClick={() => setStatus('ARCHIVED')}
+              >
+                Archived
+              </button>
+            </div>
+          </div>
+
           <div className="input-with-suggestions" style={{ width: '100%' }}>
             <input 
               placeholder="Title" 
@@ -348,6 +377,7 @@ export default function PoemsTextTab() {
               alignItems: 'stretch',
               background: 'rgba(255,255,255,0.15)',
               border: '1px solid rgba(255,255,255,0.2)',
+              borderRight: `4px solid ${poem.status === 'PUBLISHED' ? '#10b981' : poem.status === 'DRAFT' ? '#f59e0b' : '#9ca3af'}`,
               borderRadius: '10px',
               marginBottom: '12px',
               padding: '12px 16px 12px 0',

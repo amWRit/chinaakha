@@ -10,13 +10,14 @@ datasource db {
 }
 
 model Poem {
-  id        String   @id @default(cuid())
-  title     String   // Title of the poem
-  content   String?  // Nepali text (nullable for images)
-  type      PoemType // "TEXT" | "IMAGE"
-  imageId   String?  @unique // GDriveImageResource.id (nullable for text)
-  createdAt DateTime @default(now())
-  order     Int      @default(0)
+  id        String     @id @default(cuid())
+  title     String     // Title of the poem
+  content   String?    // Nepali text (nullable for images)
+  type      PoemType   // "TEXT" | "IMAGE"
+  status    PoemStatus @default(DRAFT) // Publication status
+  imageId   String?    @unique // GDriveImageResource.id (nullable for text)
+  createdAt DateTime   @default(now())
+  order     Int        @default(0)
   image     GDriveImageResource? @relation("PoemImage", fields: [imageId], references: [id], onDelete: Cascade)
 }
 
@@ -47,4 +48,10 @@ model Session {
 enum PoemType {
   TEXT
   IMAGE
+}
+
+enum PoemStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }

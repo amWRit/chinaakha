@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash, Plus, GripVertical } from "lucide-react";
+import { Pencil, Trash, Plus, GripVertical, FileText, Eye, Archive, BookOpenCheck, BookDashed } from "lucide-react";
 import Image from "next/image";
 import Modal from "./Modal";
 import Toast from "../Toast";
@@ -17,6 +17,7 @@ export default function PoemsImageTab() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT');
 
   useEffect(() => {
     fetch("/api/poems").then(res => res.json()).then(data => setPoems(data.filter((p:any) => p.type === 'IMAGE').sort((a:any, b:any) => (a.order ?? 0) - (b.order ?? 0))));
@@ -53,7 +54,7 @@ export default function PoemsImageTab() {
         const response = await fetch("/api/poems", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editingId, image: { fileId }, title })
+          body: JSON.stringify({ id: editingId, image: { fileId }, title, status })
         });
         
         if (!response.ok) {
@@ -71,7 +72,7 @@ export default function PoemsImageTab() {
         const response = await fetch("/api/poems", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title, order: maxOrder + 1 })
+          body: JSON.stringify({ type: 'IMAGE', image: { fileId }, title, status, order: maxOrder + 1 })
         });
         
         if (!response.ok) {
@@ -99,6 +100,7 @@ export default function PoemsImageTab() {
     const shareableLink = fileId ? `https://drive.google.com/file/d/${fileId}/view` : "";
     setDriveLink(shareableLink);
     setTitle(poem.title || "");
+    setStatus(poem.status || 'DRAFT');
     setShowModal(true);
   };
 
@@ -107,6 +109,7 @@ export default function PoemsImageTab() {
     setEditingId(null);
     setDriveLink("");
     setTitle("");
+    setStatus('DRAFT');
     setErrorMessage(null);
   };
 
@@ -275,6 +278,31 @@ export default function PoemsImageTab() {
               {errorMessage}
             </div>
           )}
+          <div style={{ marginBottom: 0 }}>
+            <div className="segmented-control">
+              <button
+                type="button"
+                className={`segment segment-draft ${status === 'DRAFT' ? 'active' : ''}`}
+                onClick={() => setStatus('DRAFT')}
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                className={`segment segment-published ${status === 'PUBLISHED' ? 'active' : ''}`}
+                onClick={() => setStatus('PUBLISHED')}
+              >
+                Published
+              </button>
+              <button
+                type="button"
+                className={`segment segment-archived ${status === 'ARCHIVED' ? 'active' : ''}`}
+                onClick={() => setStatus('ARCHIVED')}
+              >
+                Archived
+              </button>
+            </div>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ color: '#666', fontSize: '0.9rem', fontWeight: 500 }}>
               Title
@@ -313,6 +341,7 @@ export default function PoemsImageTab() {
               alignItems: 'stretch',
               background: 'rgba(255,255,255,0.15)',
               border: '1px solid rgba(255,255,255,0.2)',
+              borderRight: `4px solid ${poem.status === 'PUBLISHED' ? '#10b981' : poem.status === 'DRAFT' ? '#f59e0b' : '#9ca3af'}`,
               borderRadius: '10px',
               marginBottom: '12px',
               padding: '12px 16px 12px 0',

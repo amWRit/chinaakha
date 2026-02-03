@@ -43,7 +43,7 @@ export default function AddTextPoemModal({ isOpen, onClose, onSuccess }: AddText
       const response = await fetch("/api/poems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "TEXT", title, content, order: maxOrder + 1 }),
+        body: JSON.stringify({ type: "TEXT", title, content, status: "DRAFT", order: maxOrder + 1 }),
       });
 
       if (response.ok) {

@@ -240,6 +240,10 @@ body.admin {
     display: none;
   }
   
+  .status-text {
+    display: none !important;
+  }
+  
   .admin-tabs {
     width: 100%;
   }
@@ -328,7 +332,8 @@ body.admin {
 }
 
 .admin-form input,
-.admin-form textarea {
+.admin-form textarea,
+.admin-form select {
   padding: 12px 16px;
   border-radius: 8px;
   border: 2px solid #e46c6e;
@@ -337,10 +342,23 @@ body.admin {
   color: #333;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-form select {
+  padding: 12px 40px 12px 16px;
+  line-height: normal;
+  height: auto;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
 }
 
 .admin-form input:focus,
-.admin-form textarea:focus {
+.admin-form textarea:focus,
+.admin-form select:focus {
   outline: none;
   border-color: #e46c6e;
   box-shadow: 0 0 0 3px rgba(228,108,110,0.1);
@@ -349,6 +367,54 @@ body.admin {
 .admin-form textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.segmented-control .segment {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.segmented-control .segment:hover {
+  background: rgba(228, 108, 110, 0.1);
+  color: #e46c6e;
+}
+
+.segmented-control .segment.active {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.segmented-control .segment-draft.active {
+  color: #f59e0b;
+  border: 2px solid #f59e0b;
+}
+
+.segmented-control .segment-published.active {
+  color: #10b981;
+  border: 2px solid #10b981;
+}
+
+.segmented-control .segment-archived.active {
+  color: #9ca3af;
+  border: 2px solid #9ca3af;
 }
 
 .admin-form input::placeholder,
