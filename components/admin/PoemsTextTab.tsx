@@ -22,6 +22,7 @@ export default function PoemsTextTab() {
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [useRomanizedNepali, setUseRomanizedNepali] = useState(false);
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('ALL');
 
   const titleTransliteration = useNepaliTransliteration(title, setTitle, {
     enabled: useRomanizedNepali,
@@ -233,10 +234,36 @@ export default function PoemsTextTab() {
 
   return (
     <div>
-      <button className="admin-btn add" onClick={() => setShowModal(true)}>
-        <Plus size={18} />
-        <span className="admin-btn-text">Add</span>
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+        {/* Status Filter */}
+        <select 
+          value={filterStatus} 
+          onChange={(e) => setFilterStatus(e.target.value as 'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')}
+          style={{
+            padding: '10px 20px',
+            paddingRight: '36px',
+            borderRadius: '8px',
+            border: '2px solid #e46c6e',
+            background: '#fff',
+            color: '#e46c6e',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            outline: 'none',
+            minWidth: '150px'
+          }}
+        >
+          <option value="ALL">All Poems</option>
+          <option value="DRAFT">Draft</option>
+          <option value="PUBLISHED">Published</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+
+        <button className="admin-btn add" onClick={() => setShowModal(true)}>
+          <Plus size={18} />
+          <span className="admin-btn-text">Add</span>
+        </button>
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={handleCloseModal} title={editingId ? "Update Text Poem" : "Add Text Poem"}>
@@ -363,7 +390,7 @@ export default function PoemsTextTab() {
       )}
 
       <ul className="admin-list">
-        {poems.map((poem, index) => (
+        {poems.filter(poem => filterStatus === 'ALL' || poem.status === filterStatus).map((poem, index) => (
           <li 
             key={poem.id}
             draggable

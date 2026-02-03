@@ -302,7 +302,6 @@ body.admin {
   background: #fff;
   color: #e46c6e;
   border: 2px solid #e46c6e;
-  margin-bottom: 16px;
   margin-left: auto;
   padding: 10px 20px;
   font-size: 1rem;
@@ -379,42 +378,60 @@ body.admin {
 }
 
 .segmented-control .segment {
-  flex: 1;
-  padding: 10px 16px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
   border: none;
   background: transparent;
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 6px;
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  position: relative;
 }
 
 .segmented-control .segment:hover {
   background: rgba(228, 108, 110, 0.1);
-  color: #e46c6e;
+  transform: scale(1.05);
 }
 
 .segmented-control .segment.active {
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: scale(1.1);
 }
 
-.segmented-control .segment-draft.active {
-  color: #f59e0b;
-  border: 2px solid #f59e0b;
+.segmented-control .segment::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transition: all 0.2s;
 }
 
-.segmented-control .segment-published.active {
-  color: #10b981;
-  border: 2px solid #10b981;
+.segmented-control .segment:not(.segment-draft):not(.segment-published):not(.segment-archived)::before {
+  background-color: #e46c6e;
 }
 
-.segmented-control .segment-archived.active {
-  color: #9ca3af;
-  border: 2px solid #9ca3af;
+.segmented-control .segment-draft::before {
+  background-color: #f59e0b;
+}
+
+.segmented-control .segment-published::before {
+  background-color: #10b981;
+}
+
+.segmented-control .segment-archived::before {
+  background-color: #9ca3af;
+}
+
+.segmented-control .segment.active::before {
+  width: 24px;
+  height: 24px;
 }
 
 .admin-form input::placeholder,
