@@ -100,10 +100,10 @@ export function useNepaliTransliteration(
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (showSuggestions && suggestions.length > 0) {
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowRight') {
         e.preventDefault();
         setSelectedIndex((prev) => (prev + 1) % suggestions.length);
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
       } else if (e.key === ' ') {

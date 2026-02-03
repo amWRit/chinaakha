@@ -5,14 +5,19 @@ import { Copy, Download, Trash2, FileText, ChevronDown, ChevronUp, MousePointerC
 import { useNepaliTransliteration } from "@/lib/useNepaliTransliteration";
 import TransliterationSuggestions from "../TransliterationSuggestions";
 import UnicodeTips from "./UnicodeTips";
+import UnicodeExamples from "./UnicodeExamples";
 import SavePoemModal from "../SavePoemModal";
 import dynamic from "next/dynamic";
 const Toast = dynamic(() => import("../Toast"), { ssr: false });
 
-export default function UnicodeConverter() {
+interface UnicodeConverterProps {
+  showTips: boolean;
+  showExamples: boolean;
+}
+
+export default function UnicodeConverter({ showTips, showExamples }: UnicodeConverterProps) {
   const [romanizedText, setRomanizedText] = useState("");
   const [nepaliText, setNepaliText] = useState("");
-  const [showTips, setShowTips] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -109,21 +114,51 @@ export default function UnicodeConverter() {
 
   const charCount = nepaliText.length;
   const wordCount = nepaliText.trim() ? nepaliText.trim().split(/\s+/).length : 0;
+  const lineCount = nepaliText ? nepaliText.split('\n').length : 0;
 
   return (
     <div className="unicode-converter">
-      {/* Tips Section */}
-      <div className="unicode-tips-toggle">
-        <button 
-          className="tips-toggle-btn"
-          onClick={() => setShowTips(!showTips)}
-        >
-          {showTips ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          <span>Tips & Tricks</span>
-        </button>
-      </div>
-
       {showTips && <UnicodeTips />}
+      {showExamples && <UnicodeExamples />}
+
+      {/* Actions Bar */}
+      <div className="unicode-controls">
+        <button 
+          className={`footer-btn ${copySuccess ? 'footer-btn-success' : ''}`}
+          onClick={handleCopy}
+          title="Copy to clipboard"
+        >
+          <Copy size={16} />
+          <span>{copySuccess ? 'Copied!' : 'Copy'}</span>
+        </button>
+        <button 
+          className="footer-btn"
+          onClick={handleDownload}
+          title="Download as text file"
+        >
+          <Download size={16} />
+          <span>Download</span>
+        </button>
+        <button 
+          className="footer-btn"
+          onClick={handleSelectAll}
+          title="Select all text"
+        >
+          <MousePointerClick size={16} />
+          <span>Select All</span>
+        </button>
+        {isAdminAuthenticated && (
+          <button 
+            className="footer-btn"
+            onClick={() => setShowSaveModal(true)}
+            title="Save as draft poem"
+            disabled={!nepaliText.trim()}
+          >
+            <Save size={16} />
+            <span>Save as Draft</span>
+          </button>
+        )}
+      </div>
 
       {/* Converter Panes */}
       <div className="unicode-panes">
@@ -146,25 +181,25 @@ export default function UnicodeConverter() {
               </button>
             </div>
           </div>
-          <div className="pane-content">
-            <div className="input-with-suggestions" style={{ width: '100%', height: '100%' }}>
-              <textarea
-                className="unicode-textarea unicode-input"
-                placeholder="Type in English... (e.g., namaste, kasto cha)"
-                value={romanizedText}
-                onChange={(e) => transliteration.handleChange(e.target.value)}
-                onKeyDown={transliteration.handleKeyDown}
-                spellCheck={false}
+          <div className="suggestions-container-top">
+            {showSuggestions && (
+              <TransliterationSuggestions
+                suggestions={transliteration.suggestions}
+                selectedIndex={transliteration.selectedIndex}
+                onSelect={transliteration.applySuggestion}
+                show={transliteration.showSuggestions}
               />
-              {showSuggestions && (
-                <TransliterationSuggestions
-                  suggestions={transliteration.suggestions}
-                  selectedIndex={transliteration.selectedIndex}
-                  onSelect={transliteration.applySuggestion}
-                  show={transliteration.showSuggestions}
-                />
-              )}
-            </div>
+            )}
+          </div>
+          <div className="pane-content">
+            <textarea
+              className="unicode-textarea unicode-input"
+              placeholder="Type in English... (e.g., namaste, kasto cha)"
+              value={romanizedText}
+              onChange={(e) => transliteration.handleChange(e.target.value)}
+              onKeyDown={transliteration.handleKeyDown}
+              spellCheck={false}
+            />
           </div>
         </div>
 
@@ -177,41 +212,23 @@ export default function UnicodeConverter() {
               <span className="header-text-short">Output</span>
             </h3>
             <div className="pane-actions">
-              {isAdminAuthenticated && (
-                <button 
-                  className="pane-btn pane-btn-primary"
-                  onClick={() => setShowSaveModal(true)}
-                  title="Save as draft poem"
-                  disabled={!nepaliText.trim()}
-                >
-                  <Save size={16} />
-                  <span className="btn-text-desktop">Save as Draft</span>
-                </button>
-              )}
-              <button 
-                className={`pane-btn ${copySuccess ? 'pane-btn-success' : ''}`}
-                onClick={handleCopy}
-                title="Copy to clipboard"
-              >
-                <Copy size={16} />
-                <span>{copySuccess ? 'Copied!' : 'Copy'}</span>
-              </button>
-              <button 
-                className="pane-btn"
-                onClick={handleDownload}
-                title="Download as text file"
-              >
-                <Download size={16} />
-                <span>Download</span>
-              </button>
               <button 
                 className="pane-btn pane-btn-secondary"
-                onClick={handleSelectAll}
-                title="Select all text"
+                onClick={handleClear}
+                title="Clear all"
               >
-                <MousePointerClick size={16} />
-                <span>Select All</span>
+                <Trash2 size={16} />
+                <span>Clear</span>
               </button>
+            </div>
+          </div>
+          <div className="output-stats-bar">
+            <div className="stats-info">
+              <span className="stat-item">{charCount} characters</span>
+              <span className="stat-separator">•</span>
+              <span className="stat-item">{wordCount} words</span>
+              <span className="stat-separator">•</span>
+              <span className="stat-item">{lineCount} lines</span>
             </div>
           </div>
           <div className="pane-content">
@@ -222,31 +239,24 @@ export default function UnicodeConverter() {
         </div>
       </div>
 
-      {/* Options & Stats */}
+      {/* Settings Footer */}
       <div className="unicode-footer">
-        <div className="unicode-options">
-          <label className="unicode-checkbox">
-            <input
-              type="checkbox"
-              checked={showSuggestions}
-              onChange={(e) => setShowSuggestions(e.target.checked)}
-            />
-            <span>Show suggestions while typing</span>
-          </label>
-          <label className="unicode-checkbox">
-            <input
-              type="checkbox"
-              checked={autoSave}
-              onChange={(e) => setAutoSave(e.target.checked)}
-            />
-            <span>Auto-save text (saves to your browser)</span>
-          </label>
-        </div>
-        <div className="unicode-stats">
-          <span>Characters: {charCount}</span>
-          <span>•</span>
-          <span>Words: {wordCount}</span>
-        </div>
+        <label className="unicode-checkbox">
+          <input
+            type="checkbox"
+            checked={showSuggestions}
+            onChange={(e) => setShowSuggestions(e.target.checked)}
+          />
+          <span>Show suggestions while typing</span>
+        </label>
+        <label className="unicode-checkbox">
+          <input
+            type="checkbox"
+            checked={autoSave}
+            onChange={(e) => setAutoSave(e.target.checked)}
+          />
+          <span>Auto-save text (saves to your browser)</span>
+        </label>
       </div>
 
       {/* Clear Confirmation Modal */}

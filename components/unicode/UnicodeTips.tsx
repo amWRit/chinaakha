@@ -54,16 +54,6 @@ export default function UnicodeTips() {
           <div><code>om</code> = ॐ</div>
         </div>
       </div>
-
-      <div className="tips-section">
-        <h4>🎯 Poetry Tips</h4>
-        <ul>
-          <li>Use <code>/</code> for separate words in compounds</li>
-          <li>Type <code>।</code> or <code>/</code> for Nepali full stop (danda)</li>
-          <li>Type <code>॥</code> or <code>//</code> for double danda</li>
-          <li>Press Enter to preserve line breaks for stanzas</li>
-        </ul>
-      </div>
     </div>
   );
 }

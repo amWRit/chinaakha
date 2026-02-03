@@ -1,21 +1,37 @@
 "use client";
 
+import { useState } from "react";
 import UnicodeConverter from "@/components/unicode/UnicodeConverter";
-import Link from "next/link";
-import { Home } from "lucide-react";
+import UnicodeNavbar from "@/components/unicode/UnicodeNavbar";
 
 export default function UnicodePage() {
+  const [showTips, setShowTips] = useState(false);
+  const [showExamples, setShowExamples] = useState(false);
+
+  const handleToggleTips = () => {
+    setShowTips(!showTips);
+    if (!showTips) {
+      setShowExamples(false);
+    }
+  };
+
+  const handleToggleExamples = () => {
+    setShowExamples(!showExamples);
+    if (!showExamples) {
+      setShowTips(false);
+    }
+  };
+
   return (
     <main className="unicode-page">
-      <div className="unicode-header">
-        <Link href="/" className="back-button">
-          <Home size={18} />
-          <span>Home</span>
-        </Link>
-        <h1>Nepali Unicode Tool</h1>
-      </div>
+      <UnicodeNavbar 
+        showTips={showTips}
+        showExamples={showExamples}
+        onToggleTips={handleToggleTips}
+        onToggleExamples={handleToggleExamples}
+      />
 
-      <UnicodeConverter />
+      <UnicodeConverter showTips={showTips} showExamples={showExamples} />
     </main>
   );
 }
