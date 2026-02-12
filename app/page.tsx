@@ -153,71 +153,44 @@ export default function Home() {
         </button>
       )}
 
-      {/* TEMP: Admin Button (Remove Later) */}
-      <button
-        className="admin-btn"
-        style={{ 
-          position: 'fixed', 
-          top: 24, 
-          left: 24, 
-          zIndex: 1000,
-          backgroundColor: '#f59e0b',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}
-        onClick={async () => {
-          // Check session
-          const res = await fetch('/api/admins', { method: 'GET' });
-          if (res.status === 200 && res.headers.get('x-admin-authenticated') === 'true') {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/admin/login');
-          }
-        }}
-      >
-        <Shield size={18} />
-        <span>Admin</span>
-      </button>
-
       {/* Unicode Tool Button */}
       {showUnicode && (
         <button
           className="unicode-btn"
           style={{ 
-          position: 'fixed', 
-          top: 24, 
-          left: 160, 
-          zIndex: 1000,
-          backgroundColor: '#e46c6e',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '10px 16px',
-          fontSize: '0.9rem',
-          fontWeight: 600,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 2px 8px rgba(228,108,110,0.3)',
-          transition: 'all 0.2s ease'
-        }}
-        onClick={() => router.push('/tools/unicode')}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#d35d5f';
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(228,108,110,0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#e46c6e';
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 2px 8px rgba(228,108,110,0.3)';
-        }}
-      >
-        <Type size={18} />
-        <span>Unicode</span>
-      </button>
+            position: 'fixed', 
+            top: 24, 
+            left: 24, 
+            zIndex: 1000,
+            backgroundColor: '#e46c6e',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '10px 16px',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 8px rgba(228,108,110,0.3)',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={() => router.push('/tools/unicode')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#d35d5f';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(228,108,110,0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#e46c6e';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(228,108,110,0.3)';
+          }}
+        >
+          <Type size={18} />
+          <span>Unicode</span>
+        </button>
       )}
 
       {/* Enhanced Tab Buttons */}
